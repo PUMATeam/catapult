@@ -1,0 +1,12 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "centos/7"
+  config.vm.network "private_network", ip: "192.168.50.50", auto_config: true
+  config.ssh.forward_agent = true
+
+  config.vm.provider "libvirt" do |domain|
+    domain.memory = "512"
+  end
+end
