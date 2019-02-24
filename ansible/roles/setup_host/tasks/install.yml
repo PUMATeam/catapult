@@ -1,0 +1,31 @@
+- name: install packages
+  become: yes
+  yum:
+    name:
+    - docker
+    - git
+    state: present
+  tags:
+    - packages
+
+- name: add docker group
+  become: yes
+  group:
+    name: docker
+    state: present
+
+- name: add user to docker group
+  become: yes
+  user:
+    name: "{{ user }}"
+    groups: docker
+    append: yes
+
+- name: start docker
+  become: yes
+  systemd:
+    name: docker
+    enabled: yes
+    state: started
+
+- include: download.yml
