@@ -1,46 +1,15 @@
-- name: remove socket if exists
-  file:
-    state: absent
-    path: /tmp/firecracker.socket
+- debug:
+    msg: "{{ user }}"
 
 - name: set kvm permissions
-  shell: sudo setfacl -m u:${USER}:rw /dev/kvm
+  become: yes
+  shell: "setfacl -m u:{{ user }}:rw /dev/kvm"
 
-- name: connect to socket
-  shell: nohup src/firecracker/build/release/firecracker --api-sock /tmp/firecracker.socket </dev/null >/dev/null 2>&1 &
-
-- name: add kernel
+- name: start vm
   shell: >
-         curl --unix-socket /tmp/firecracker.socket -i
-         -X PUT 'http://localhost/boot-source'
-         -H 'Accept: application/json'
-         -H 'Content-Type: application/json'
-         -d '{
-               "kernel_image_path": "./hello-vmlinux.bin",
-               "boot_args": "console=ttyS0 reboot=k panic=1 pci=off"
-             }'
-
-- name: add fs
-  shell: >
-         curl --unix-socket /tmp/firecracker.socket -i \
-         -X PUT 'http://localhost/drives/rootfs' \
-         -H 'Accept: application/json'           \
-         -H 'Content-Type: application/json'     \
-         -d '{
-              "drive_id": "rootfs",
-              "path_on_host": "./hello-rootfs.ext4",
-              "is_root_device": true,
-              "is_read_only": false
-            }'
-
-- name: start VM
-  shell: >
-         curl --unix-socket /tmp/firecracker.socket -i \
-         -X PUT 'http://localhost/actions'       \
-         -H  'Accept: application/json'          \
-         -H  'Content-Type: application/json'    \
-         -d '{
-             "action_type": "InstanceStart"
-          }'
-
+         ./firectl \
+          --firecracker-binary=./firecracker \
+          --kernel=./hello-vmlinux.bin \
+          --root-drive=./hello-rootfs.ext4 \
+          --kernel-opts="console=ttyS0 noapic reboot=k panic=1 pci=off nomodules rw" &
 

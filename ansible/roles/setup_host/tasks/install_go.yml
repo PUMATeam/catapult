@@ -1,0 +1,21 @@
+- name: check if already downloaded
+  become: yes
+  stat:
+    path: /usr/local/go
+  register: go_dir
+
+- name: extract go
+  become: yes
+  unarchive:
+    remote_src: yes
+    src: https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
+    dest: "/usr/local/"
+  when: not go_dir.stat.exists
+
+- name: set permissions
+  become: yes
+  file:
+    path: /usr/local/go
+    mode: 0755
+    owner: "{{ user }}"
+
