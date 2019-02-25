@@ -1,13 +1,7 @@
-- name: check if socket exists
-  stat:
-    path: /tmp/firecracker.socket
-  register: socket_exists
-
 - name: remove socket if exists
   file:
     state: absent
     path: /tmp/firecracker.socket
-  when: socket_exists.stat.exists == True
 
 - name: set kvm permissions
   shell: sudo setfacl -m u:${USER}:rw /dev/kvm
