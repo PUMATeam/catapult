@@ -1,0 +1,22 @@
+- name: download firecracker
+  get_url:
+    url: "https://github.com/firecracker-microvm/firecracker/releases/download/v{{ fc_version }}/firecracker-v{{ fc_version}}"
+    dest: ./firecracker
+
+- name: set execute permissions
+  file:
+    path: ./firecracker
+    mode: 0755
+
+- name: download firecracker kernel
+  get_url:
+    url: https://s3.amazonaws.com/spec.ccfc.min/img/hello/kernel/hello-vmlinux.bin
+    dest: ./hello-vmlinux.bin
+
+- name: download firecracker fs
+  get_url:
+    url: https://s3.amazonaws.com/spec.ccfc.min/img/hello/fsfiles/hello-rootfs.ext4
+    dest: ./hello-rootfs.ext4
+
+- import_tasks: install_go.yml
+- import_tasks: build_firectl.yml

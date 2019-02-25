@@ -1,9 +1,0 @@
-- name: download firecracker kernel
-  get_url:
-    url: https://s3.amazonaws.com/spec.ccfc.min/img/hello/kernel/hello-vmlinux.bin
-    dest: hello-vmlinux.bin
-
-- name: download firecracker fs
-  get_url:
-    url: https://s3.amazonaws.com/spec.ccfc.min/img/hello/fsfiles/hello-rootfs.ext4
-    dest: hello-rootfs.ext4
