@@ -8,7 +8,7 @@
   become: yes
   unarchive:
     remote_src: yes
-    src: https://dl.google.com/go/go1.11.5.linux-amd64.tar.gz
+    src: https://dl.google.com/go/go1.12.linux-amd64.tar.gz
     dest: "/usr/local/"
   when: not go_dir.stat.exists
 
