@@ -12,7 +12,7 @@
     dest: "/usr/local/"
   when: not go_dir.stat.exists
 
-- name: set permissions
+- name: set permissions to go binary
   become: yes
   file:
     path: /usr/local/go

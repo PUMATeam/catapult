@@ -11,15 +11,22 @@
 
 - name: build firectl
   block:
-    - shell: make
+    - name: build firectl from source
+      shell: make
       args:
         chdir: src/firectl
       environment:
         GOROOT: /usr/local/go
         PATH: "/usr/local/go/bin:{{ ansible_env.PATH }}"
 
-    - copy:
+    - name: copy firectl executable to $HOME
+      copy:
         remote_src: yes
         src: src/firectl/firectl
         dest: $HOME/firectl
   when: not firectl.stat.exists
+
+- name: set correct permissions to firectl
+  file:
+    path: $HOME/firectl
+    mode: "u+x"
