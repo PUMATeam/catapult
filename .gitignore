@@ -95,3 +95,4 @@ typings/
 .vagrant/
 *.retry
 
+db.toml
