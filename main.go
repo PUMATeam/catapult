@@ -5,12 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Migrate() {
-
-}
-
 func main() {
-	model.Setup()
+	model.InitDB()
 	gin := gin.Default()
 	gin.Run()
 }
