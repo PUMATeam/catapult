@@ -1,14 +1,16 @@
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/PUMATeam/catapult/model"
+	"github.com/gin-gonic/gin"
+)
+
+func Migrate() {
+
+}
 
 func main() {
-	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
-
-	r.Run()
+	model.Setup()
+	gin := gin.Default()
+	gin.Run()
 }
