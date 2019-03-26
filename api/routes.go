@@ -17,7 +17,10 @@ func InitRoutes() *chi.Mux {
 	r.Use(middleware.Timeout(60 * time.Second))
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
-	r.Get("/hosts", GetHosts)
+	r.Route("/hosts", func(r chi.Router) {
+		r.Get("/", GetHosts)
+		r.Post("/", AddHost)
+	})
 
 	return r
 }

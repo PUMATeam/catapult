@@ -10,6 +10,5 @@ import (
 func main() {
 	model.InitDB()
 	router := api.InitRoutes()
-
 	http.ListenAndServe(":3333", router)
 }
