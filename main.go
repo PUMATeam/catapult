@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/PUMATeam/catapult"
+import "github.com/PUMATeam/catapult/cmd"
 
 func main() {
 	cmd.Execute()
