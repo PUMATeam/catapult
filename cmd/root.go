@@ -44,6 +44,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.cobra-poo.yaml)")
+	viper.SetDefault("db_config", "db.toml")
 
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

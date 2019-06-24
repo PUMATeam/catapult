@@ -21,6 +21,7 @@ func InitRoutes() *chi.Mux {
 
 	return r
 }
+
 func getHosts(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, "get hosts")
 }
