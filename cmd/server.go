@@ -15,13 +15,23 @@
 package cmd
 
 import (
+	"log"
+
+	"github.com/BurntSushi/toml"
 	"github.com/PUMATeam/catapult/api"
 	"github.com/spf13/cobra"
 )
 
 var (
-	port int
+	port         int
+	dbConfigFile string
 )
+
+type config struct {
+	Database string
+	User     string
+	Password string
+}
 
 // restCmd represents the rest command
 var serverCmd = &cobra.Command{
@@ -37,4 +47,13 @@ func init() {
 	rootCmd.AddCommand(serverCmd)
 
 	serverCmd.Flags().IntVarP(&port, "port", "p", 8888, "Port for which to listen")
+}
+
+func readDBConfig() (string, string, string) {
+	var dbConfig config
+	if _, err := toml.DecodeFile(dbConfigFile, &dbConfig); err != nil {
+		log.Fatalf("Failed reading db config: %s", err)
+	}
+
+	return dbConfig.Database, dbConfig.User, dbConfig.Password
 }
