@@ -3,7 +3,7 @@ package cmd
 import (
 	"log"
 
-	migration "github.com/PUMATeam/catapult/db/migration"
+	migration "github.com/PUMATeam/catapult/database/migration"
 	"github.com/spf13/cobra"
 )
 

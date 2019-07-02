@@ -1,6 +1,8 @@
 package model
 
+// Host represents the hosts table
 type Host struct {
-	description string
-	address     string
+	ID          string `json:"host_id"`
+	Description string
+	Address     string
 }
