@@ -26,6 +26,25 @@ func (as *hostsService) ListHosts(ctx context.Context) ([]model.Host, error) {
 	return as.hostsRepository.ListHosts(ctx)
 }
 
-func (as *hostsService) AddHost(ctx context.Context) (uuid.UUID, error) {
-	return uuid.NewV4(), nil
+func (as *hostsService) AddHost(ctx context.Context, newHost NewHost) (uuid.UUID, error) {
+	// TODO add validations
+	host := model.Host{
+		Name:    newHost.Name,
+		Address: newHost.Address,
+		Status:  DOWN,
+	}
+
+	id, err := as.hostsRepository.AddHost(ctx, host)
+
+	return id, err
 }
+
+type NewHost struct {
+	Name    string `json:"name"`
+	Address string `json:"address"`
+}
+
+const (
+	DOWN int = 0
+	UP   int = 1
+)

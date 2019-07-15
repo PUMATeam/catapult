@@ -18,7 +18,8 @@ type hostsRepository struct {
 }
 
 func (h *hostsRepository) AddHost(ctx context.Context, host model.Host) (uuid.UUID, error) {
-	return uuid.NewV4(), nil
+	err := h.db.WithContext(ctx).Insert(&host)
+	return host.ID, err
 }
 
 func (h *hostsRepository) UpdateHost(ctx context.Context, host model.Host) error {
@@ -30,5 +31,5 @@ func (h *hostsRepository) HostByID(ctx context.Context, id uuid.UUID) (*model.Ho
 }
 
 func (h *hostsRepository) ListHosts(ctx context.Context) ([]model.Host, error) {
-	return nil, nil
+	return make([]model.Host, 0, 0), nil
 }

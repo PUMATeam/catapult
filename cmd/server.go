@@ -27,7 +27,8 @@ var serverCmd = &cobra.Command{
 	Short: "Start catapult server",
 	Long:  `Start catapult server`,
 	Run: func(cmd *cobra.Command, args []string) {
-		api.Start(port)
+		handler := api.Bootstrap(port)
+		api.Start(handler)
 	},
 }
 
