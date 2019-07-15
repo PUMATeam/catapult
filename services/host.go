@@ -45,6 +45,7 @@ type NewHost struct {
 }
 
 const (
-	DOWN int = 0
-	UP   int = 1
+	DOWN       int = 1
+	INSTALLING int = 2
+	UP         int = 3
 )

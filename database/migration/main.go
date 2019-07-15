@@ -1,7 +1,6 @@
 package migration
 
 import (
-	"flag"
 	"log"
 
 	"github.com/PUMATeam/catapult/database"
@@ -15,7 +14,7 @@ func Migrate(args []string) error {
 		log.Fatal(err)
 	}
 
-	oldVersion, newVersion, err := migrations.Run(db, flag.Args()...)
+	oldVersion, newVersion, err := migrations.Run(db, args...)
 	if err != nil {
 		return err
 	}

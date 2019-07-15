@@ -15,7 +15,6 @@ var migrateCmd = &cobra.Command{
 	Short: "exectute migrations",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Println("migrate called")
 		argsMig := args[:0]
 		for _, arg := range args {
 			switch arg {
@@ -24,6 +23,7 @@ var migrateCmd = &cobra.Command{
 				argsMig = append(argsMig, arg)
 			}
 		}
+
 		var err error
 		if reset {
 			err = migration.Reset()
