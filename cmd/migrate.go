@@ -24,11 +24,14 @@ var migrateCmd = &cobra.Command{
 				argsMig = append(argsMig, arg)
 			}
 		}
-
+		var err error
 		if reset {
-			migration.Reset()
+			err = migration.Reset()
 		} else {
-			migration.Migrate(argsMig)
+			err = migration.Migrate(argsMig)
+		}
+		if err != nil {
+			log.Fatalln(err)
 		}
 	},
 }
