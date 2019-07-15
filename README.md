@@ -16,6 +16,11 @@ encoding 'UTF8' lc_collate 'en_US.UTF-8' lc_ctype 'en_US.UTF-8';
 
 ```
 
+Install pgcrypto extenstion
+```
+  CREATE EXTENSION 'pgcrypto'
+```
+
 # FAQ
 > Will we succeed?
 
