@@ -34,5 +34,7 @@ func (h *hostsRepository) HostByID(ctx context.Context, id uuid.UUID) (*model.Ho
 }
 
 func (h *hostsRepository) ListHosts(ctx context.Context) ([]model.Host, error) {
-	return make([]model.Host, 0, 0), nil
+	var hosts []model.Host
+	err := h.db.WithContext(ctx).Model(&hosts).Select()
+	return hosts, err
 }
