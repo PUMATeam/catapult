@@ -27,8 +27,8 @@ func (h *hostsRepository) UpdateHost(ctx context.Context, host model.Host) error
 }
 
 func (h *hostsRepository) HostByID(ctx context.Context, id uuid.UUID) (*model.Host, error) {
-	host := &model.Host{}
-	err := h.db.WithContext(ctx).Model(host).Where("id = ?", id).Select()
+	host := &model.Host{ID: id}
+	err := h.db.WithContext(ctx).Select(host)
 
 	return host, err
 }
