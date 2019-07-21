@@ -14,28 +14,30 @@ const (
 
 func ExecuteAnsible(playbook string, host string) {
 	hostParam := fmt.Sprintf("%s,", host)
-	userParam := "user=vagrant"
-	ansibleUserParam := "ansible_user=vagrant"
-	sshKeyParam := "ansible_ssh_private_key_file=./tests/insecure_private_key"
+	userParam := "vagrant"
+	sshKeyParam := "--private-key=./tests/insecure_private_key"
 	fcVersionParam := "fc_version=0.15.0"
-	ansibleParams := fmt.Sprintf("-e \"%s %s %s %s\"", userParam, ansibleUserParam, sshKeyParam, fcVersionParam)
+	ansibleParams := fmt.Sprintf("-e \"user=%s %s %s\"", userParam, sshKeyParam, fcVersionParam)
 	var outb, errb bytes.Buffer
 	cmd := exec.Command(ansiblePlaybookCmd,
 		playbook,
 		"-i",
 		hostParam,
+		"-u",
+		userParam,
+		sshKeyParam,
 		ansibleParams,
+		"-v",
 	)
+
 	log.Printf("Running %s with %s", cmd.Path, cmd.Args)
 	cmd.Stdout = &outb
 	cmd.Stderr = &errb
 
 	err := cmd.Run()
-	fmt.Println("out:", outb.String(), "err:", errb.String())
-
 	if err != nil {
-		log.Fatal(err)
+		log.Println(errb.String())
 	}
 
-	fmt.Println("out:", outb.String(), "err:", errb.String())
+	fmt.Println("out:", outb.String())
 }

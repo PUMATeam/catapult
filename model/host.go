@@ -10,4 +10,6 @@ type Host struct {
 	Name    string
 	Address string
 	Status  int
+
+	// TODO add root user, root password
 }
