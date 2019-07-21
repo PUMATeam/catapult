@@ -3,6 +3,8 @@ package services
 import (
 	"context"
 
+	"github.com/PUMATeam/catapult/util"
+
 	"github.com/PUMATeam/catapult/model"
 	"github.com/PUMATeam/catapult/repositories"
 	uuid "github.com/satori/go.uuid"
@@ -27,7 +29,7 @@ func (as *hostsService) ListHosts(ctx context.Context) ([]model.Host, error) {
 }
 
 func (as *hostsService) AddHost(ctx context.Context, newHost NewHost) (uuid.UUID, error) {
-	// TODO add validations
+	// TODO add validations and make transactional in case ansible fails
 	host := model.Host{
 		Name:    newHost.Name,
 		Address: newHost.Address,
@@ -35,7 +37,7 @@ func (as *hostsService) AddHost(ctx context.Context, newHost NewHost) (uuid.UUID
 	}
 
 	id, err := as.hostsRepository.AddHost(ctx, host)
-
+	util.ExecuteAnsible(util.SetupHostPlaybook, host.Address)
 	return id, err
 }
 
