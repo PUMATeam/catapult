@@ -14,7 +14,7 @@ func init() {
 							 name VARCHAR(50), 
 							 address VARCHAR(16),
 							 status INT4,
-							 user_name VARCHAR(32),
+							 user VARCHAR(32),
 							 password TEXT)`)
 		return err
 	}, func(db migrations.DB) error {
