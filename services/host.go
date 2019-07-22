@@ -34,6 +34,9 @@ func (as *hostsService) AddHost(ctx context.Context, newHost NewHost) (uuid.UUID
 		Name:    newHost.Name,
 		Address: newHost.Address,
 		Status:  DOWN,
+		User:    newHost.User,
+		// TODO: encrypt the password
+		Password: newHost.Password,
 	}
 
 	id, err := as.hostsRepository.AddHost(ctx, host)
@@ -42,8 +45,10 @@ func (as *hostsService) AddHost(ctx context.Context, newHost NewHost) (uuid.UUID
 }
 
 type NewHost struct {
-	Name    string `json:"name"`
-	Address string `json:"address"`
+	Name     string `json:"name"`
+	Address  string `json:"address"`
+	User     string `json:"user"`
+	Password string `json:"password"`
 }
 
 const (
