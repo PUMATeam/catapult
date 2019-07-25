@@ -1,5 +1,10 @@
 package util
 
+import (
+	"fmt"
+	"strings"
+)
+
 const (
 	SetupHostPlaybook  = "ansible/roles/setup_host/playbook.yml"
 	ansiblePlaybookCmd = "ansible-playbook"
@@ -9,10 +14,40 @@ type AnsibleCommand struct {
 	Playbook    string
 	ExtraParams map[string]string
 	User        string
+	Host        string
+	cmd         string
 }
 
-func generateCmd(playbook string, extraParams map[string]string) string {
-	return ""
+// NewAnsibleCommand creates a new AnsibleCommand
+func NewAnsibleCommand(playbook, user, host string, params map[string]string) *AnsibleCommand {
+	ac := &AnsibleCommand{
+		Playbook:    playbook,
+		ExtraParams: params,
+		User:        user,
+		Host:        host,
+	}
+
+	ac.generateCmd()
+
+	return ac
+}
+
+func (ac *AnsibleCommand) generateCmd() {
+	cmd := fmt.Sprintf("%s %s -i %s, -u %s",
+		ansiblePlaybookCmd,
+		ac.Playbook,
+		ac.Host,
+		ac.User)
+	extraParamsString := ""
+	for key, value := range ac.ExtraParams {
+		extraParamsString += fmt.Sprintf("%s=%s ", key, value)
+	}
+
+	cmd = fmt.Sprintf("%s -e \"%s\"",
+		cmd,
+		strings.TrimSpace(extraParamsString))
+
+	ac.cmd = cmd
 }
 
 // func ExecuteAnsible(params map[string]string) {
