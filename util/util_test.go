@@ -23,6 +23,6 @@ func TestStructToMapLowerCase(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(got, expected) {
-		t.Errorf("Expected %s, got: %s", expected, got)
+		t.Errorf("\n\tGOT: %s \n\tEXPECTED: %s", got, expected)
 	}
 }
