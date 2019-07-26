@@ -1,7 +1,10 @@
 package node
 
 import (
+	"strings"
+
 	"github.com/PUMATeam/catapult/model"
+	"github.com/PUMATeam/catapult/util"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -14,16 +17,40 @@ type NodeService interface {
 }
 
 type Node struct {
-	host model.Host
+	Host model.Host
+}
+
+// NewNode creates a Node instance
+func NewNode(host model.Host) *Node {
+	return &Node{
+		Host: host,
+	}
 }
 
 // InstallHost installs prerequisits on the host
-func (n *Node) InstallHost() {
+func (n *Node) InstallHost() error {
+	hi := hostInstall{
+		User:            n.Host.User,
+		FcVersion:       FcVersion,
+		AnsiblePassword: n.Host.Password,
+	}
+	ac := util.NewAnsibleCommand(util.SetupHostPlaybook,
+		hi.User,
+		n.Host.Address,
+		util.StructToMap(hi, strings.ToLower))
+	err := ac.ExecuteAnsible()
+	if err != nil {
+		return err
+	}
 
+	return nil
 }
 
-type HostInstall struct {
-	Address  string
-	User     string
-	Password string
+// TODO make it configurable
+const FcVersion = "0.15.0"
+
+type hostInstall struct {
+	User            string `json:"ignore"`
+	AnsiblePassword string `json:"ansible_ssh_pass"`
+	FcVersion       string
 }

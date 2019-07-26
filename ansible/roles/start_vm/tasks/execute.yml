@@ -13,7 +13,7 @@
   copy:
     src: ../files/start_fc.sh
     dest: start_fc.sh
-    owner: "{{ user }}"
+#    owner: "{{ ansible_user }}"
     mode: u=rwx
   when: not start_fc.stat.exists
 
