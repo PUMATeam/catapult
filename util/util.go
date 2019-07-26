@@ -12,9 +12,19 @@ func StructToMap(in interface{}, f func(s string) string) map[string]string {
 
 	for i := 0; i < v.NumField(); i++ {
 		// gets us a StructField
+		tag := f(typ.Field(i).Tag.Get("json"))
+
+		if tag == "ignore" {
+			continue
+		}
+
 		fi := f(typ.Field(i).Name)
 		// set key of map to value in struct field
-		out[fi] = v.Field(i).String()
+		key := fi
+		if tag != "" {
+			key = tag
+		}
+		out[key] = v.Field(i).String()
 	}
 
 	return out

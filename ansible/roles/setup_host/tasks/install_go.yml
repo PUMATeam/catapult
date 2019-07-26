@@ -17,5 +17,5 @@
   file:
     path: /usr/local/go
     mode: 0755
-    owner: "{{ user }}"
+    owner: "{{ ansible_user }}"
 

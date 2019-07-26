@@ -3,6 +3,8 @@ package services
 import (
 	"context"
 
+	"github.com/PUMATeam/catapult/node"
+
 	"github.com/PUMATeam/catapult/model"
 	"github.com/PUMATeam/catapult/repositories"
 	uuid "github.com/satori/go.uuid"
@@ -38,7 +40,9 @@ func (as *hostsService) AddHost(ctx context.Context, newHost NewHost) (uuid.UUID
 	}
 
 	id, err := as.hostsRepository.AddHost(ctx, host)
-	//util.ExecuteAnsible(util.SetupHostPlaybook, host.Address)
+	n := node.NewNode(host)
+	err = n.InstallHost()
+
 	return id, err
 }
 

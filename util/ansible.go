@@ -1,8 +1,10 @@
 package util
 
 import (
+	"bytes"
 	"fmt"
-	"strings"
+	"log"
+	"os/exec"
 )
 
 const (
@@ -15,7 +17,7 @@ type AnsibleCommand struct {
 	ExtraParams map[string]string
 	User        string
 	Host        string
-	cmd         string
+	cmd         []string
 }
 
 // NewAnsibleCommand creates a new AnsibleCommand
@@ -33,51 +35,35 @@ func NewAnsibleCommand(playbook, user, host string, params map[string]string) *A
 }
 
 func (ac *AnsibleCommand) generateCmd() {
-	cmd := fmt.Sprintf("%s %s -i %s, -u %s",
-		ansiblePlaybookCmd,
+	cmd := []string{
 		ac.Playbook,
-		ac.Host,
-		ac.User)
-	extraParamsString := ""
-	for key, value := range ac.ExtraParams {
-		extraParamsString += fmt.Sprintf("%s=%s ", key, value)
+		"-i",
+		fmt.Sprintf("%s,", ac.Host),
+		"-u",
+		ac.User,
 	}
 
-	cmd = fmt.Sprintf("%s -e \"%s\"",
-		cmd,
-		strings.TrimSpace(extraParamsString))
+	for key, value := range ac.ExtraParams {
+		cmd = append(cmd, fmt.Sprintf("-e %s=%s", key, value))
+	}
 
 	ac.cmd = cmd
 }
 
-// func ExecuteAnsible(params map[string]string) {
-// 	hostParam := fmt.Sprintf("%s,", host)
-// 	userParam := "vagrant"
-// 	hostUserParam := fmt.Sprintf("host_user=%s", userParam)
-// 	sshKeyParam := "--private-key=./tests/insecure_private_key"
-// 	fcVersionParam := "fc_version=0.15.0"
-// 	extraVars := fmt.Sprintf("%s %s", hostUserParam, fcVersionParam)
-// 	ansibleParams := fmt.Sprintf("-e %s", extraVars)
-// 	var outb, errb bytes.Buffer
-// 	cmd := exec.Command(ansiblePlaybookCmd,
-// 		playbook,
-// 		"-i",
-// 		hostParam,
-// 		"-u",
-// 		userParam,
-// 		sshKeyParam,
-// 		ansibleParams,
-// 		"-v",
-// 	)
+// ExecuteAnsible executes a given ansible playbook
+func (ac *AnsibleCommand) ExecuteAnsible() error {
+	cmd := exec.Command(ansiblePlaybookCmd, ac.cmd...)
+	log.Printf("Running with %s", cmd.Args)
+	var outBuffer, errBuffer bytes.Buffer
+	cmd.Stdout = &outBuffer
+	cmd.Stderr = &errBuffer
 
-// 	log.Printf("Running with %s", cmd.Args)
-// 	cmd.Stdout = &outb
-// 	cmd.Stderr = &errb
+	err := cmd.Run()
+	log.Println(outBuffer.String())
+	if err != nil {
+		log.Println(errBuffer.String())
+		return err
+	}
 
-// 	err := cmd.Run()
-// 	if err != nil {
-// 		log.Println(errb.String())
-// 	}
-
-// 	fmt.Println("out:", outb.String())
-// }
+	return nil
+}
