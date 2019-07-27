@@ -30,3 +30,4 @@
     state: started
 
 - include: setup_firecracker.yml
+- include: build_catapult_node.yml

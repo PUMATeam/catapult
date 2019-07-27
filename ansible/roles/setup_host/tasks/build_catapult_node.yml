@@ -1,0 +1,46 @@
+- name: clone catapult-node
+  git:
+    repo: https://github.com/PUMATeam/catapult-node.git
+    dest: src/catapult-node
+
+- name: check if catapult-node built
+  stat:
+    path: $HOME/catapult-node
+  register: catapult
+
+- name: build catapult-node
+  block:
+    - name: build catapult-node from source
+      shell: go build
+      args:
+        chdir: src/catapult-node
+      environment:
+        GOROOT: /usr/local/go
+        PATH: "/usr/local/go/bin:{{ ansible_env.PATH }}"
+
+    - name: copy catapult-node executable to $HOME
+      copy:
+        remote_src: yes
+        src: src/catapult-node/catapult-node
+        dest: $HOME/catapult-node
+  when: not catapult.stat.exists
+
+- name: set correct permissions to catapult-node
+  file:
+    path: $HOME/catapult-node
+    mode: "u+x"
+
+- name: check if catapult-node is running
+  command: pgrep catapult-node
+  register: catapult_node_running
+  ignore_errors: true
+
+- name: check catapult-node pgrep
+  debug:
+    msg: "{{ catapult_node_running }}"
+
+- name: start catapult-node
+  command: ./catapult-node serve
+  async: 10
+  poll: 0
+  when: catapult_node_running.rc == 1

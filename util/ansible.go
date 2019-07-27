@@ -1,10 +1,7 @@
 package util
 
 import (
-	"bytes"
 	"fmt"
-	"log"
-	"os/exec"
 )
 
 const (
@@ -52,18 +49,5 @@ func (ac *AnsibleCommand) generateCmd() {
 
 // ExecuteAnsible executes a given ansible playbook
 func (ac *AnsibleCommand) ExecuteAnsible() error {
-	cmd := exec.Command(ansiblePlaybookCmd, ac.cmd...)
-	log.Printf("Running with %s", cmd.Args)
-	var outBuffer, errBuffer bytes.Buffer
-	cmd.Stdout = &outBuffer
-	cmd.Stderr = &errBuffer
-
-	err := cmd.Run()
-	log.Println(outBuffer.String())
-	if err != nil {
-		log.Println(errBuffer.String())
-		return err
-	}
-
-	return nil
+	return ExecuteCmd(ansiblePlaybookCmd, ac.cmd)
 }
