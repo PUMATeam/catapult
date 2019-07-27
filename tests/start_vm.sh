@@ -19,4 +19,5 @@ fi
 #mac_address=$(virsh dumpxml centos7 | grep "mac address" | awk -F\' '{ print $2}')
 #echo "Setting ip address to ${ip_address} for MAC address ${mac_address}"
 #./update_network.py centos7 default ${ip_address} $mac_address
-#virsh start centos7
+echo "starting centos 7..."
+virsh start centos7
