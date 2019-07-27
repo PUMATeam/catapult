@@ -11,3 +11,4 @@
     - will be assigned a uuid
     - the uuid will be used for the unix socket path as well
     - create a tap device for the VM, same uuid will be used
+    - need to save VMs on the host to keep track (sqlite?)

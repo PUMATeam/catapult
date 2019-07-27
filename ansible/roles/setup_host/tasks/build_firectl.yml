@@ -8,7 +8,6 @@
     path: ./firectl
   register: firectl
 
-
 - name: build firectl
   block:
     - name: build firectl from source
