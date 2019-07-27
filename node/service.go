@@ -3,6 +3,7 @@ package node
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"google.golang.org/grpc"
@@ -44,6 +45,7 @@ func (n *Node) InstallHost() error {
 		util.StructToMap(hi, strings.ToLower))
 	err := ac.ExecuteAnsible()
 	if err != nil {
+		log.Println("Error during host install: ", err)
 		return err
 	}
 
@@ -67,7 +69,12 @@ func (n *Node) StartVM(vm model.VM) error {
 		Vcpus:  int32(vm.VCPU),
 	}
 	client := NewNodeClient(conn)
-	client.StartVM(context.TODO(), vmConfig)
+	resp, err := client.StartVM(context.TODO(), vmConfig)
+	if err != nil {
+		fmt.Println("grpc error: ", err)
+	}
+
+	fmt.Println("grpc response:", resp)
 
 	return nil
 }

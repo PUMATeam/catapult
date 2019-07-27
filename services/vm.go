@@ -13,6 +13,7 @@ import (
 
 func (v *vmsService) initNodeService() node.NodeService {
 	hosts, err := v.hostsRepository.ListHosts(context.TODO())
+	log.Println("hosts found: ", hosts)
 	if err != nil {
 		log.Println(err)
 	}
@@ -33,6 +34,8 @@ func NewVMsService(vr repositories.VMs, hr repositories.Hosts) VMs {
 		vmsRepository:   vr,
 		hostsRepository: hr,
 	}
+
+	// TODO: this should be done lazily
 	vs.nodeService = vs.initNodeService()
 
 	return vs

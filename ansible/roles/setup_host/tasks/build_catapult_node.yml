@@ -40,7 +40,7 @@
     msg: "{{ catapult_node_running }}"
 
 - name: start catapult-node
-  command: nohup ./catapult-node serve </dev/null >/dev/null 2>&1
+  command: nohup ./catapult-node serve &
   async: 10
   poll: 0
   when: catapult_node_running.rc == 1

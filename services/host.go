@@ -29,6 +29,7 @@ func (as *hostsService) ListHosts(ctx context.Context) ([]model.Host, error) {
 	return as.hostsRepository.ListHosts(ctx)
 }
 
+// TODO: not working
 func (as *hostsService) UpdateHostStatus(ctx context.Context, host *model.Host, status int) error {
 	host.Status = status
 	return as.hostsRepository.UpdateHost(ctx, host)
@@ -67,6 +68,7 @@ type NewHost struct {
 	Password string `json:"password"`
 }
 
+// TODO: find a better way to do this
 const (
 	DOWN       int = 1
 	INSTALLING int = 2
