@@ -34,7 +34,7 @@ func vmsEndpoints(r *chi.Mux, vs services.VMs) {
 		decodeStartVMReq,
 		encodeResponse,
 	)
-	r.Method(http.MethodGet, "/vms/{vmID}", startVMHandler)
+	r.Method(http.MethodPost, "/vms/start", startVMHandler)
 
 }
 
@@ -56,6 +56,7 @@ func vmsEndpoint(vs services.VMs) endpoint.Endpoint {
 func startVMEndpoint(vs services.VMs) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqVM := request.(model.VM)
+		log.Println("reqVM", reqVM)
 		vm, err := vs.StartVM(ctx, reqVM)
 		return vm, err
 	}

@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/PUMATeam/catapult/services"
@@ -62,7 +61,6 @@ func hostByIDEndpoint(svc services.Hosts) endpoint.Endpoint {
 func decodeAddHostReq(_ context.Context, r *http.Request) (interface{}, error) {
 	defer r.Body.Close()
 	var host services.NewHost
-	log.Println(r.Body)
 	err := json.NewDecoder(r.Body).Decode(&host)
 	return host, err
 }
