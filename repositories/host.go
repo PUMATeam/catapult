@@ -18,12 +18,13 @@ type hostsRepository struct {
 }
 
 func (h *hostsRepository) AddHost(ctx context.Context, host model.Host) (uuid.UUID, error) {
+	host.ID = uuid.NewV4()
 	err := h.db.WithContext(ctx).Insert(&host)
 	return host.ID, err
 }
 
-func (h *hostsRepository) UpdateHost(ctx context.Context, host model.Host) error {
-	return nil
+func (h *hostsRepository) UpdateHost(ctx context.Context, host *model.Host) error {
+	return h.db.WithContext(ctx).Update(&host)
 }
 
 func (h *hostsRepository) HostByID(ctx context.Context, id uuid.UUID) (*model.Host, error) {

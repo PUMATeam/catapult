@@ -10,11 +10,11 @@ func init() {
 	migrations.MustRegisterTx(func(db migrations.DB) error {
 		log.Println("Ceating table hosts...")
 		_, err := db.Exec(`CREATE TABLE hosts 
-							(id UUID DEFAULT gen_random_uuid(),
+							(id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 							 name VARCHAR(50), 
 							 address VARCHAR(16),
 							 status INT4,
-							 user VARCHAR(32),
+							 host_user VARCHAR(32),
 							 password TEXT)`)
 		return err
 	}, func(db migrations.DB) error {
