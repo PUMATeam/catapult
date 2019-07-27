@@ -1,7 +1,11 @@
 package node
 
 import (
+	"context"
+	"fmt"
 	"strings"
+
+	"google.golang.org/grpc"
 
 	"github.com/PUMATeam/catapult/model"
 	"github.com/PUMATeam/catapult/util"
@@ -10,39 +14,69 @@ import (
 
 // NodeService exposes operations to perform on a host
 type NodeService interface {
-	InstallHost(host model.Host) error
+	InstallHost() error
 	ListVMs() ([]uuid.UUID, error)
-	StartVM(vmId uuid.UUID) error
+	StartVM(vm model.VM) error
 	StopVM(vmId uuid.UUID) error
 }
 
 type Node struct {
-	Host model.Host
+	host model.Host
 }
 
-// NewNode creates a Node instance
-func NewNode(host model.Host) *Node {
+// NewNodeService creates a Node instance
+func NewNodeService(host model.Host) NodeService {
 	return &Node{
-		Host: host,
+		host: host,
 	}
 }
 
 // InstallHost installs prerequisits on the host
 func (n *Node) InstallHost() error {
 	hi := hostInstall{
-		User:            n.Host.User,
+		User:            n.host.User,
 		FcVersion:       FcVersion,
-		AnsiblePassword: n.Host.Password,
+		AnsiblePassword: n.host.Password,
 	}
 	ac := util.NewAnsibleCommand(util.SetupHostPlaybook,
 		hi.User,
-		n.Host.Address,
+		n.host.Address,
 		util.StructToMap(hi, strings.ToLower))
 	err := ac.ExecuteAnsible()
 	if err != nil {
 		return err
 	}
 
+	return nil
+}
+
+func (n *Node) StartVM(vm model.VM) error {
+	// TODO: make configurable
+	conn, err := grpc.Dial(fmt.Sprintf("%s:8888", n.host.Address), grpc.WithInsecure())
+	if err != nil {
+		return err
+	}
+
+	uuid := &UUID{
+		Value: vm.ID.String(),
+	}
+
+	vmConfig := &VmConfig{
+		VmID:   uuid,
+		Memory: int32(vm.Memory),
+		Vcpus:  int32(vm.VCPU),
+	}
+	client := NewNodeClient(conn)
+	client.StartVM(context.TODO(), vmConfig)
+
+	return nil
+}
+
+func (n *Node) ListVMs() ([]uuid.UUID, error) {
+	return nil, nil
+}
+
+func (n *Node) StopVM(vmId uuid.UUID) error {
 	return nil
 }
 

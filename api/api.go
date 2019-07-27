@@ -19,12 +19,14 @@ import (
 
 var port int
 
-func New(hs services.Hosts) http.Handler {
+func New(hs services.Hosts,
+	vs services.VMs) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 
 	hostsEndpoints(r, hs)
+	vmsEndpoints(r, vs)
 
 	return r
 }
@@ -38,7 +40,11 @@ func Bootstrap(p int) http.Handler {
 
 	hr := repositories.NewHostsRepository(db)
 	hs := services.NewHostsService(hr)
-	return New(hs)
+
+	vr := repositories.NewVMsRepository(db)
+	vs := services.NewVMsService(vr, hr)
+
+	return New(hs, vs)
 }
 
 // Start start the server and listens on the provided port
