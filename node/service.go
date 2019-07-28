@@ -3,19 +3,15 @@ package node
 import (
 	"context"
 	"fmt"
-	"log"
-	"strings"
 
 	"google.golang.org/grpc"
 
 	"github.com/PUMATeam/catapult/model"
-	"github.com/PUMATeam/catapult/util"
 	uuid "github.com/satori/go.uuid"
 )
 
 // NodeService exposes operations to perform on a host
 type NodeService interface {
-	InstallHost() error
 	ListVMs() ([]uuid.UUID, error)
 	StartVM(vm model.VM) error
 	StopVM(vmId uuid.UUID) error
@@ -30,26 +26,6 @@ func NewNodeService(host model.Host) NodeService {
 	return &Node{
 		host: host,
 	}
-}
-
-// InstallHost installs prerequisits on the host
-func (n *Node) InstallHost() error {
-	hi := hostInstall{
-		User:            n.host.User,
-		FcVersion:       FcVersion,
-		AnsiblePassword: n.host.Password,
-	}
-	ac := util.NewAnsibleCommand(util.SetupHostPlaybook,
-		hi.User,
-		n.host.Address,
-		util.StructToMap(hi, strings.ToLower))
-	err := ac.ExecuteAnsible()
-	if err != nil {
-		log.Println("Error during host install: ", err)
-		return err
-	}
-
-	return nil
 }
 
 func (n *Node) StartVM(vm model.VM) error {
@@ -85,13 +61,4 @@ func (n *Node) ListVMs() ([]uuid.UUID, error) {
 
 func (n *Node) StopVM(vmId uuid.UUID) error {
 	return nil
-}
-
-// TODO make it configurable
-const FcVersion = "0.15.0"
-
-type hostInstall struct {
-	User            string `json:"ignore"`
-	AnsiblePassword string `json:"ansible_ssh_pass"`
-	FcVersion       string
 }

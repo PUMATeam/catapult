@@ -11,7 +11,7 @@ type Hosts interface {
 	AddHost(context.Context, model.Host) (uuid.UUID, error)
 	ListHosts(context.Context) ([]model.Host, error)
 	HostByID(context.Context, uuid.UUID) (*model.Host, error)
-	UpdateHost(context.Context, *model.Host) error
+	UpdateHost(context.Context, model.Host) error
 }
 
 type VMs interface {
