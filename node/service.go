@@ -29,7 +29,7 @@ func NewNodeService(host model.Host) NodeService {
 }
 
 func (n *Node) StartVM(vm model.VM) error {
-	// TODO: make configurable
+	// TODO: make port configurable
 	conn, err := grpc.Dial(fmt.Sprintf("%s:8888", n.host.Address), grpc.WithInsecure())
 	if err != nil {
 		return err

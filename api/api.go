@@ -53,6 +53,7 @@ func Start(h http.Handler) {
 		Handler: h,
 		Addr:    ":" + strconv.Itoa(port),
 	}
+	log.Println("Listening on ", server.Addr)
 
 	// TODO: add shutdown handling
 	server.ListenAndServe()
