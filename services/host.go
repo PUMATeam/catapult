@@ -69,7 +69,7 @@ func (hs *hostsService) AddHost(ctx context.Context, newHost NewHost) (uuid.UUID
 func (hs *hostsService) InstallHost(h model.Host) error {
 	hi := hostInstall{
 		User:            h.User,
-		FcVersion:       FcVersion,
+		FcVersion:       fcVersion,
 		AnsiblePassword: h.Password,
 	}
 	ac := util.NewAnsibleCommand(util.SetupHostPlaybook,
@@ -106,4 +106,4 @@ type hostInstall struct {
 }
 
 // TODO make it configurable
-const FcVersion = "0.15.0"
+const fcVersion = "0.15.0"

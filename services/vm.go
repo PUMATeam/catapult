@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"github.com/PUMATeam/catapult/node"
@@ -11,22 +12,6 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-func (v *vmsService) initNodeService() node.NodeService {
-	hosts, err := v.hostsRepository.ListHosts(context.TODO())
-	log.Println("hosts found: ", hosts)
-	if err != nil {
-		log.Println(err)
-	}
-
-	for _, h := range hosts {
-		if h.Status == UP {
-			return node.NewNodeService(h)
-		}
-	}
-
-	return nil
-}
-
 // NewVMsService instantiates a new VM service
 func NewVMsService(vr repositories.VMs, hr repositories.Hosts) VMs {
 	// TODO this looks weird and wrong
@@ -35,16 +20,12 @@ func NewVMsService(vr repositories.VMs, hr repositories.Hosts) VMs {
 		hostsRepository: hr,
 	}
 
-	// TODO: this should be done lazily
-	vs.nodeService = vs.initNodeService()
-
 	return vs
 }
 
 type vmsService struct {
 	vmsRepository   repositories.VMs
 	hostsRepository repositories.Hosts
-	nodeService     node.NodeService
 }
 
 func (v *vmsService) AddVM(ctx context.Context, vm NewVM) (uuid.UUID, error) {
@@ -54,8 +35,12 @@ func (v *vmsService) AddVM(ctx context.Context, vm NewVM) (uuid.UUID, error) {
 func (v *vmsService) StartVM(ctx context.Context, vm model.VM) (*model.VM, error) {
 	// TODO: algorithm should be - look for a host in status up and run the
 	// VM on it
-	err := v.nodeService.StartVM(vm)
+	nodeService := v.initNodeService()
+	if nodeService == nil {
+		return nil, fmt.Errorf("Could not find host in status up")
+	}
 
+	err := nodeService.StartVM(vm)
 	if err != nil {
 		return nil, err
 	}
@@ -73,6 +58,22 @@ func (v *vmsService) StopVM(ctx context.Context, host NewHost) (uuid.UUID, error
 
 func (v *vmsService) ListVmsForHost(ctx context.Context, hostID uuid.UUID) ([]uuid.UUID, error) {
 	return nil, nil
+}
+
+func (v *vmsService) initNodeService() node.NodeService {
+	hosts, err := v.hostsRepository.ListHosts(context.TODO())
+	log.Println("hosts found: ", hosts)
+	if err != nil {
+		log.Println(err)
+	}
+
+	for _, h := range hosts {
+		if h.Status == UP {
+			return node.NewNodeService(h)
+		}
+	}
+
+	return nil
 }
 
 type NewVM struct {

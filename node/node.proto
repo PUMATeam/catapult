@@ -21,7 +21,6 @@ message Response {
     }
 
     RequestStatus status = 1;
-    string error = 2;
 }
 
 message VmList {
@@ -33,4 +32,3 @@ service Node {
     rpc StopVM(UUID) returns (Response) {}
     rpc ListVMs(google.protobuf.Empty) returns (VmList) {}
 }
-
