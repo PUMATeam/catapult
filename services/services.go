@@ -12,7 +12,7 @@ type Hosts interface {
 	HostByID(ctx context.Context, id uuid.UUID) (*model.Host, error)
 	ListHosts(ctx context.Context) ([]model.Host, error)
 	AddHost(ctx context.Context, host NewHost) (uuid.UUID, error)
-	UpdateHostStatus(ctx context.Context, host *model.Host, status int) error
+	UpdateHostStatus(ctx context.Context, host model.Host, status int) error
 }
 
 type VMs interface {

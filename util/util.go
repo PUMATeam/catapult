@@ -56,6 +56,6 @@ func ExecuteCmd(cmdName string, args []string) error {
 	if err := cmd.Wait(); err != nil {
 		log.Fatal(err)
 	}
-	return nil
 
+	return nil
 }
