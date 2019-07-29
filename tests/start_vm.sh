@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 echo "Defining centos VM..."
 if virsh list --all | grep -q centos7; then
     echo "centos7 is already installed... "
