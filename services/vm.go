@@ -7,7 +7,6 @@ import (
 
 	"github.com/PUMATeam/catapult/node"
 
-	"github.com/PUMATeam/catapult/model"
 	"github.com/PUMATeam/catapult/repositories"
 	uuid "github.com/satori/go.uuid"
 )
@@ -32,7 +31,7 @@ func (v *vmsService) AddVM(ctx context.Context, vm NewVM) (uuid.UUID, error) {
 	return uuid.Nil, nil
 }
 
-func (v *vmsService) StartVM(ctx context.Context, vm model.VM) (*model.VM, error) {
+func (v *vmsService) StartVM(ctx context.Context, vmCfg node.RunVMCfg) (*node.RunVMCfg, error) {
 	// TODO: algorithm should be - look for a host in status up and run the
 	// VM on it
 	nodeService := v.initNodeService()
@@ -40,12 +39,12 @@ func (v *vmsService) StartVM(ctx context.Context, vm model.VM) (*model.VM, error
 		return nil, fmt.Errorf("Could not find host in status up")
 	}
 
-	err := nodeService.StartVM(vm)
+	err := nodeService.StartVM(vmCfg)
 	if err != nil {
 		return nil, err
 	}
 
-	return &vm, nil
+	return &vmCfg, nil
 }
 
 func (v *vmsService) ListVms(ctx context.Context) ([]uuid.UUID, error) {

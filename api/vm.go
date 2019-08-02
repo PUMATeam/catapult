@@ -3,10 +3,10 @@ package api
 import (
 	"context"
 	"encoding/json"
-	"log"
 	"net/http"
 
-	"github.com/PUMATeam/catapult/model"
+	"github.com/PUMATeam/catapult/node"
+
 	"github.com/PUMATeam/catapult/services"
 	"github.com/go-chi/chi"
 	"github.com/go-kit/kit/endpoint"
@@ -55,8 +55,7 @@ func vmsEndpoint(vs services.VMs) endpoint.Endpoint {
 
 func startVMEndpoint(vs services.VMs) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		reqVM := request.(model.VM)
-		log.Println("reqVM", reqVM)
+		reqVM := request.(node.RunVMCfg)
 		vm, err := vs.StartVM(ctx, reqVM)
 		return vm, err
 	}
@@ -80,8 +79,7 @@ func decodeVMByIDRequest(_ context.Context, r *http.Request) (interface{}, error
 // TODO unify with decodeAddVmReq
 func decodeStartVMReq(_ context.Context, r *http.Request) (interface{}, error) {
 	defer r.Body.Close()
-	var vm model.VM
-	log.Println(r.Body)
+	var vm node.RunVMCfg
 	err := json.NewDecoder(r.Body).Decode(&vm)
 	return vm, err
 }
