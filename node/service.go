@@ -41,8 +41,8 @@ func (n *Node) StartVM(vm model.VM) error {
 
 	vmConfig := &VmConfig{
 		VmID:   uuid,
-		Memory: int32(vm.Memory),
-		Vcpus:  int32(vm.VCPU),
+		Memory: vm.Memory,
+		Vcpus:  vm.VCPU,
 	}
 	client := NewNodeClient(conn)
 	resp, err := client.StartVM(context.TODO(), vmConfig)

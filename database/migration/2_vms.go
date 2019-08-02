@@ -14,8 +14,8 @@ func init() {
 							 name VARCHAR(50), 
 							 status INT4,
 							 host_id UUID REFERENCES hosts(id),
-							 vcpu INT4,
-							 memory INT4)`)
+							 vcpu INTEGER,
+							 memory INTEGER)`)
 		return err
 	}, func(db migrations.DB) error {
 		log.Println("Dropping table vms...")
