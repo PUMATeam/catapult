@@ -53,10 +53,12 @@ func Start(h http.Handler) {
 		Handler: h,
 		Addr:    ":" + strconv.Itoa(port),
 	}
-	log.Println("Listening on ", server.Addr)
 
 	// TODO: add shutdown handling
-	server.ListenAndServe()
+	err := server.ListenAndServe()
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 type IDResponse struct {
@@ -85,7 +87,7 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(codeFrom(err))
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"error": err.Error(),
+		"error": err,
 	})
 }
 

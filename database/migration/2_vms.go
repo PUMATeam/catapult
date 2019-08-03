@@ -15,7 +15,9 @@ func init() {
 							 status INT4,
 							 host_id UUID REFERENCES hosts(id),
 							 vcpu INTEGER,
-							 memory INTEGER)`)
+							 memory INTEGER,
+							 kernel VARCHAR(255),
+							 root_file_system VARCHAR(255))`)
 		return err
 	}, func(db migrations.DB) error {
 		log.Println("Dropping table vms...")

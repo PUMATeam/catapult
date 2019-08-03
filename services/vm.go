@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/PUMATeam/catapult/model"
+
 	"github.com/PUMATeam/catapult/node"
 
 	"github.com/PUMATeam/catapult/repositories"
@@ -28,10 +30,23 @@ type vmsService struct {
 }
 
 func (v *vmsService) AddVM(ctx context.Context, vm NewVM) (uuid.UUID, error) {
-	return uuid.Nil, nil
+	// TODO extract to some util
+	vmToAdd := model.VM{
+		ID:             uuid.NewV4(),
+		Name:           vm.Name,
+		VCPU:           vm.VCPU,
+		Memory:         vm.Memory,
+		Status:         DOWN,
+		HostID:         uuid.Nil,
+		KernelImage:    vm.Kernel,
+		RootFileSystem: vm.RootFileSystem,
+	}
+
+	log.Println("add vm", vmToAdd)
+	return v.vmsRepository.AddVM(ctx, vmToAdd)
 }
 
-func (v *vmsService) StartVM(ctx context.Context, vmCfg node.RunVMCfg) (*node.RunVMCfg, error) {
+func (v *vmsService) StartVM(ctx context.Context, vmID uuid.UUID) (*model.VM, error) {
 	// TODO: algorithm should be - look for a host in status up and run the
 	// VM on it
 	nodeService := v.initNodeService()
@@ -39,24 +54,45 @@ func (v *vmsService) StartVM(ctx context.Context, vmCfg node.RunVMCfg) (*node.Ru
 		return nil, fmt.Errorf("Could not find host in status up")
 	}
 
-	err := nodeService.StartVM(vmCfg)
+	vm, err := v.VMByID(ctx, vmID)
 	if err != nil {
 		return nil, err
 	}
 
-	return &vmCfg, nil
+	err = nodeService.StartVM(vm)
+	if err != nil {
+		return nil, err
+	}
+
+	v.UpdateVMStatus(ctx, vm, UP)
+
+	return &vm, nil
 }
 
-func (v *vmsService) ListVms(ctx context.Context) ([]uuid.UUID, error) {
-	return nil, nil
+func (v *vmsService) ListVms(ctx context.Context) ([]model.VM, error) {
+	return v.vmsRepository.ListVMs(ctx)
 }
 
 func (v *vmsService) StopVM(ctx context.Context, host NewHost) (uuid.UUID, error) {
 	return uuid.Nil, nil
 }
 
-func (v *vmsService) ListVmsForHost(ctx context.Context, hostID uuid.UUID) ([]uuid.UUID, error) {
+func (v *vmsService) ListVmsForHost(ctx context.Context, hostID uuid.UUID) ([]model.VM, error) {
 	return nil, nil
+}
+
+func (v *vmsService) UpdateVMStatus(ctx context.Context, vm model.VM, status int) error {
+	vm.Status = status
+	return v.vmsRepository.UpdateVM(ctx, vm)
+}
+
+func (v *vmsService) VMByID(ctx context.Context, vmID uuid.UUID) (model.VM, error) {
+	vm, err := v.vmsRepository.VMByID(ctx, vmID)
+	if err != nil {
+		return model.VM{}, ErrNotFound
+	}
+
+	return vm, nil
 }
 
 func (v *vmsService) initNodeService() node.NodeService {
@@ -76,7 +112,9 @@ func (v *vmsService) initNodeService() node.NodeService {
 }
 
 type NewVM struct {
-	Name   string `json:"name"`
-	VCPU   string `json:"vcpu"`
-	Memory string `json:"memory"`
+	Name           string `json:"name"`
+	VCPU           int64  `json:"vcpu"`
+	Memory         int64  `json:"memory"`
+	Kernel         string `json:"kernel"`
+	RootFileSystem string `json:"rootfs"`
 }

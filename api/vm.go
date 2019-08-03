@@ -3,9 +3,8 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
-
-	"github.com/PUMATeam/catapult/node"
 
 	"github.com/PUMATeam/catapult/services"
 	"github.com/go-chi/chi"
@@ -22,27 +21,29 @@ func vmsEndpoints(r *chi.Mux, vs services.VMs) {
 	)
 	r.Method(http.MethodPost, "/vms", addVMHandler)
 
+	startVMHandler := httptransport.NewServer(
+		startVMEndpoint(vs),
+		decodeVMByIDRequest,
+		encodeResponse,
+	)
+	r.Method(http.MethodPost, "/vms/{vmID}/start", startVMHandler)
+
 	listVMsHandler := httptransport.NewServer(
 		vmsEndpoint(vs),
 		httptransport.NopRequestDecoder,
 		encodeResponse,
 	)
 	r.Method(http.MethodGet, "/vms", listVMsHandler)
-
-	startVMHandler := httptransport.NewServer(
-		startVMEndpoint(vs),
-		decodeStartVMReq,
-		encodeResponse,
-	)
-	r.Method(http.MethodPost, "/vms/start", startVMHandler)
-
 }
 
 func addVMEndpoint(svc services.VMs) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(services.NewVM)
 		id, err := svc.AddVM(ctx, req)
-		return IDResponse{ID: id}, err
+		log.Println("Returned from service.AddVM id", id)
+		resp := IDResponse{ID: id}
+		log.Println("Resp", resp)
+		return resp, err
 	}
 }
 
@@ -55,8 +56,8 @@ func vmsEndpoint(vs services.VMs) endpoint.Endpoint {
 
 func startVMEndpoint(vs services.VMs) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		reqVM := request.(node.RunVMCfg)
-		vm, err := vs.StartVM(ctx, reqVM)
+		reqID := request.(uuid.UUID)
+		vm, err := vs.StartVM(ctx, reqID)
 		return vm, err
 	}
 }
@@ -74,12 +75,4 @@ func decodeVMByIDRequest(_ context.Context, r *http.Request) (interface{}, error
 		return nil, err
 	}
 	return id, nil
-}
-
-// TODO unify with decodeAddVmReq
-func decodeStartVMReq(_ context.Context, r *http.Request) (interface{}, error) {
-	defer r.Body.Close()
-	var vm node.RunVMCfg
-	err := json.NewDecoder(r.Body).Decode(&vm)
-	return vm, err
 }
