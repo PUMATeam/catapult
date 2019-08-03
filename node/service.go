@@ -13,7 +13,7 @@ import (
 // NodeService exposes operations to perform on a host
 type NodeService interface {
 	ListVMs() ([]uuid.UUID, error)
-	StartVM(vm RunVMCfg) error
+	StartVM(vmID model.VM) error
 	StopVM(vmId uuid.UUID) error
 }
 
@@ -28,7 +28,7 @@ func NewNodeService(host model.Host) NodeService {
 	}
 }
 
-func (n *Node) StartVM(vm RunVMCfg) error {
+func (n *Node) StartVM(vm model.VM) error {
 	// TODO: make port configurable
 	conn, err := grpc.Dial(fmt.Sprintf("%s:8888", n.host.Address), grpc.WithInsecure())
 	if err != nil {
@@ -63,10 +63,4 @@ func (n *Node) ListVMs() ([]uuid.UUID, error) {
 
 func (n *Node) StopVM(vmId uuid.UUID) error {
 	return nil
-}
-
-type RunVMCfg struct {
-	model.VM
-	KernelImage    string `json:"kernel"`
-	RootFileSystem string `json:"rootfs"`
 }

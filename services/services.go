@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 
-	"github.com/PUMATeam/catapult/node"
-
 	"github.com/PUMATeam/catapult/model"
 	uuid "github.com/satori/go.uuid"
 )
@@ -19,10 +17,12 @@ type Hosts interface {
 
 type VMs interface {
 	AddVM(ctx context.Context, vm NewVM) (uuid.UUID, error)
-	StartVM(ctx context.Context, vm node.RunVMCfg) (*node.RunVMCfg, error)
-	ListVms(ctx context.Context) ([]uuid.UUID, error)
-	ListVmsForHost(ctx context.Context, hostID uuid.UUID) ([]uuid.UUID, error)
+	StartVM(ctx context.Context, id uuid.UUID) (*model.VM, error)
+	ListVms(ctx context.Context) ([]model.VM, error)
+	ListVmsForHost(ctx context.Context, hostID uuid.UUID) ([]model.VM, error)
 	StopVM(ctx context.Context, host NewHost) (uuid.UUID, error)
+	UpdateVMStatus(ctx context.Context, vm model.VM, status int) error
+	VMByID(ctx context.Context, vmID uuid.UUID) (model.VM, error)
 }
 
 var (
