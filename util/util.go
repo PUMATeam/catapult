@@ -3,7 +3,7 @@ package util
 import (
 	"bufio"
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"os/exec"
 	"reflect"
 )
