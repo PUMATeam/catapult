@@ -6,7 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"net/http"
 
-	"github.com/PUMATeam/catapult/services"
+	"github.com/PUMATeam/catapult/pkg/services"
 	"github.com/go-chi/chi"
 	"github.com/go-kit/kit/endpoint"
 	httptransport "github.com/go-kit/kit/transport/http"
