@@ -97,3 +97,7 @@ typings/
 
 db.toml
 catapult
+.vscode/*
+.idea/*
+
+
