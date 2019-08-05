@@ -1,7 +1,7 @@
 package migration
 
 import (
-	"log"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/PUMATeam/catapult/database"
 	"github.com/go-pg/migrations"

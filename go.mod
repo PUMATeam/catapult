@@ -17,6 +17,7 @@ require (
 	github.com/onsi/ginkgo v1.8.0 // indirect
 	github.com/onsi/gomega v1.5.0 // indirect
 	github.com/satori/go.uuid v1.2.0
+	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.4
 	github.com/spf13/viper v1.3.2
 	golang.org/x/net v0.0.0-20190603091049-60506f45cf65 // indirect

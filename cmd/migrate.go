@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"log"
+	log "github.com/sirupsen/logrus"
 
 	migration "github.com/PUMATeam/catapult/database/migration"
 	"github.com/spf13/cobra"

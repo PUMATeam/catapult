@@ -2,7 +2,7 @@ package services
 
 import (
 	"context"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"strings"
 
 	"github.com/PUMATeam/catapult/util"
