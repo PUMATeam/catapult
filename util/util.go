@@ -51,10 +51,10 @@ func ExecuteCmd(cmdName string, args []string) error {
 		}
 	}()
 	if err := cmd.Start(); err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	if err := cmd.Wait(); err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 
 	return nil
