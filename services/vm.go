@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+
 	log "github.com/sirupsen/logrus"
 
 	"github.com/PUMATeam/catapult/model"
@@ -42,7 +43,7 @@ func (v *vmsService) AddVM(ctx context.Context, vm NewVM) (uuid.UUID, error) {
 		RootFileSystem: vm.RootFileSystem,
 	}
 
-	log.Println("add vm", vmToAdd)
+	log.Debug("add vm", vmToAdd)
 	return v.vmsRepository.AddVM(ctx, vmToAdd)
 }
 
@@ -56,10 +57,11 @@ func (v *vmsService) StartVM(ctx context.Context, vmID uuid.UUID) (*model.VM, er
 
 	vm, err := v.VMByID(ctx, vmID)
 	if err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
-	err = nodeService.StartVM(vm)
+	err = nodeService.StartVM(ctx, vm)
 	if err != nil {
 		return nil, err
 	}

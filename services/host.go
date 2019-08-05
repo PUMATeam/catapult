@@ -2,8 +2,9 @@ package services
 
 import (
 	"context"
-	log "github.com/sirupsen/logrus"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/PUMATeam/catapult/util"
 
@@ -54,7 +55,7 @@ func (hs *hostsService) AddHost(ctx context.Context, newHost NewHost) (uuid.UUID
 		return uuid.Nil, err
 	}
 
-	log.Println("Updating status of host", host.Name, "to up")
+	log.Info("Updating status of host", host.Name, "to up")
 	err = hs.UpdateHostStatus(ctx, host, UP)
 	if err != nil {
 		log.Println("Failed to update status of host", host.Name, "to up")

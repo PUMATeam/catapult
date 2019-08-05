@@ -3,9 +3,11 @@ package api
 import (
 	"context"
 	"encoding/json"
-	log "github.com/sirupsen/logrus"
 	"net/http"
+	"os"
 	"strconv"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/go-chi/chi/middleware"
 
@@ -18,6 +20,12 @@ import (
 )
 
 var port int
+
+func initLog() {
+	// TODO make configurable
+	log.SetOutput(os.Stdout)
+	log.SetLevel(log.DebugLevel)
+}
 
 func New(hs services.Hosts,
 	vs services.VMs) http.Handler {
@@ -49,6 +57,7 @@ func Bootstrap(p int) http.Handler {
 
 // Start start the server and listens on the provided port
 func Start(h http.Handler) {
+	initLog()
 	server := http.Server{
 		Handler: h,
 		Addr:    ":" + strconv.Itoa(port),

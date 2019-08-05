@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 
 	"github.com/PUMATeam/catapult/model"
@@ -13,7 +14,7 @@ import (
 // NodeService exposes operations to perform on a host
 type NodeService interface {
 	ListVMs() ([]uuid.UUID, error)
-	StartVM(vmID model.VM) error
+	StartVM(ctx context.Context, vm model.VM) error
 	StopVM(vmId uuid.UUID) error
 }
 
@@ -28,7 +29,8 @@ func NewNodeService(host model.Host) NodeService {
 	}
 }
 
-func (n *Node) StartVM(vm model.VM) error {
+// StartVM starts an FC VM on the host
+func (n *Node) StartVM(ctx context.Context, vm model.VM) error {
 	// TODO: make port configurable
 	conn, err := grpc.Dial(fmt.Sprintf("%s:8888", n.host.Address), grpc.WithInsecure())
 	if err != nil {
@@ -47,12 +49,12 @@ func (n *Node) StartVM(vm model.VM) error {
 		RootFileSystem: vm.RootFileSystem,
 	}
 	client := NewNodeClient(conn)
-	resp, err := client.StartVM(context.TODO(), vmConfig)
+	resp, err := client.StartVM(ctx, vmConfig)
 	if err != nil {
-		fmt.Println("grpc error: ", err)
+		log.Error("grpc error: ", err)
 	}
 
-	fmt.Println("grpc response:", resp)
+	log.Debug("grpc response:", resp)
 
 	return nil
 }
