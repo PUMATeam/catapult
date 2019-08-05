@@ -4,9 +4,11 @@
 package node
 
 import (
+	context "context"
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
-	_ "github.com/golang/protobuf/ptypes/empty"
+	empty "github.com/golang/protobuf/ptypes/empty"
+	grpc "google.golang.org/grpc"
 	math "math"
 )
 
@@ -338,4 +340,175 @@ var fileDescriptor_a18530e439628818 = []byte{
 	0xbb, 0xe5, 0xe0, 0xf3, 0x76, 0x39, 0x86, 0x5d, 0x6e, 0xef, 0xc8, 0x1c, 0xfa, 0x09, 0x88, 0x6d,
 	0xf7, 0x5f, 0xf3, 0x21, 0xff, 0xc7, 0x83, 0x32, 0xe7, 0x9c, 0x18, 0xdf, 0xc7, 0x3f, 0x01, 0x00,
 	0x00, 0xff, 0xff, 0x26, 0xac, 0xc1, 0x36, 0x92, 0x02, 0x00, 0x00,
+}
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConn
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion4
+
+// NodeClient is the client API for Node service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type NodeClient interface {
+	StartVM(ctx context.Context, in *VmConfig, opts ...grpc.CallOption) (*Response, error)
+	StopVM(ctx context.Context, in *UUID, opts ...grpc.CallOption) (*Response, error)
+	ListVMs(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*VmList, error)
+	Health(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*HealthCheckResponse, error)
+}
+
+type nodeClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewNodeClient(cc *grpc.ClientConn) NodeClient {
+	return &nodeClient{cc}
+}
+
+func (c *nodeClient) StartVM(ctx context.Context, in *VmConfig, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, "/Node/StartVM", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *nodeClient) StopVM(ctx context.Context, in *UUID, opts ...grpc.CallOption) (*Response, error) {
+	out := new(Response)
+	err := c.cc.Invoke(ctx, "/Node/StopVM", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *nodeClient) ListVMs(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*VmList, error) {
+	out := new(VmList)
+	err := c.cc.Invoke(ctx, "/Node/ListVMs", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *nodeClient) Health(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*HealthCheckResponse, error) {
+	out := new(HealthCheckResponse)
+	err := c.cc.Invoke(ctx, "/Node/Health", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// NodeServer is the server API for Node service.
+type NodeServer interface {
+	StartVM(context.Context, *VmConfig) (*Response, error)
+	StopVM(context.Context, *UUID) (*Response, error)
+	ListVMs(context.Context, *empty.Empty) (*VmList, error)
+	Health(context.Context, *empty.Empty) (*HealthCheckResponse, error)
+}
+
+func RegisterNodeServer(s *grpc.Server, srv NodeServer) {
+	s.RegisterService(&_Node_serviceDesc, srv)
+}
+
+func _Node_StartVM_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VmConfig)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NodeServer).StartVM(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Node/StartVM",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NodeServer).StartVM(ctx, req.(*VmConfig))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Node_StopVM_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UUID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NodeServer).StopVM(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Node/StopVM",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NodeServer).StopVM(ctx, req.(*UUID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Node_ListVMs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(empty.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NodeServer).ListVMs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Node/ListVMs",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NodeServer).ListVMs(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Node_Health_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(empty.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NodeServer).Health(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Node/Health",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NodeServer).Health(ctx, req.(*empty.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _Node_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "Node",
+	HandlerType: (*NodeServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "StartVM",
+			Handler:    _Node_StartVM_Handler,
+		},
+		{
+			MethodName: "StopVM",
+			Handler:    _Node_StopVM_Handler,
+		},
+		{
+			MethodName: "ListVMs",
+			Handler:    _Node_ListVMs_Handler,
+		},
+		{
+			MethodName: "Health",
+			Handler:    _Node_Health_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "node/node.proto",
 }
