@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 
-	"github.com/PUMATeam/catapult/model"
+	"github.com/PUMATeam/catapult/pkg/model"
 	uuid "github.com/satori/go.uuid"
 )
 

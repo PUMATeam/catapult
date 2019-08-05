@@ -11,11 +11,11 @@ import (
 
 	"github.com/go-chi/chi/middleware"
 
-	"github.com/PUMATeam/catapult/repositories"
-	"github.com/PUMATeam/catapult/services"
+	"github.com/PUMATeam/catapult/pkg/repositories"
+	"github.com/PUMATeam/catapult/pkg/services"
 	"github.com/go-chi/chi"
 
-	"github.com/PUMATeam/catapult/database"
+	"github.com/PUMATeam/catapult/internal/database"
 	uuid "github.com/satori/go.uuid"
 )
 

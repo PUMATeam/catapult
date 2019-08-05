@@ -3,7 +3,7 @@ package repositories
 import (
 	"context"
 
-	"github.com/PUMATeam/catapult/model"
+	"github.com/PUMATeam/catapult/pkg/model"
 	uuid "github.com/satori/go.uuid"
 )
 

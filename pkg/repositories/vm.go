@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/PUMATeam/catapult/model"
+	"github.com/PUMATeam/catapult/pkg/model"
 	"github.com/go-pg/pg"
 	uuid "github.com/satori/go.uuid"
 )

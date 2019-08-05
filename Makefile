@@ -16,7 +16,8 @@ COMMIT=$(shell git rev-parse HEAD)
 BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 
 COMMON_ENV=CGO_ENABLED=0 GOOS=linux GOARCH=amd64
-COMMON_GO_BUILD_FLAGS=-ldflags '-extldflags "-static"'
+#COMMON_GO_BUILD_FLAGS=-ldflags '-extldflags "-static"'
+COMMON_GO_BUILD_FLAGS=
 
 TARBALL=catapult-$(VERSION_RELEASE).tar.gz
 
@@ -52,7 +53,7 @@ clean:
 
 .PHONY: generate
 generate:
-	protoc -I node/ --go_out=plugins=grpc:node node/node.proto
+	protoc -I pkg/node --go_out=plugins=grpc:pkg/node pkg/node/node.proto
 
 .PHONY: tarball
 tarball: $(TARBALL)

@@ -6,10 +6,10 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/PUMATeam/catapult/util"
+	"github.com/PUMATeam/catapult/pkg/util"
 
-	"github.com/PUMATeam/catapult/model"
-	"github.com/PUMATeam/catapult/repositories"
+	"github.com/PUMATeam/catapult/pkg/model"
+	"github.com/PUMATeam/catapult/pkg/repositories"
 	uuid "github.com/satori/go.uuid"
 )
 

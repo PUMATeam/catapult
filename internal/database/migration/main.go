@@ -3,7 +3,7 @@ package migration
 import (
 	log "github.com/sirupsen/logrus"
 
-	"github.com/PUMATeam/catapult/database"
+	"github.com/PUMATeam/catapult/internal/database"
 	"github.com/go-pg/migrations"
 )
 
