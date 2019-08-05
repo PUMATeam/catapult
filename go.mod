@@ -20,7 +20,7 @@ require (
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/cobra v0.0.4
 	github.com/spf13/viper v1.3.2
-	golang.org/x/net v0.0.0-20190603091049-60506f45cf65 // indirect
+	golang.org/x/net v0.0.0-20190603091049-60506f45cf65
 	google.golang.org/grpc v1.22.0
 	mellium.im/sasl v0.2.1 // indirect
 )
