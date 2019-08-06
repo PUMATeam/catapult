@@ -16,26 +16,24 @@ import (
 var catapultNode *grpc.Server
 
 func setup() {
-	port := 8888
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 0))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	catapultNode = grpc.NewServer()
 
 	node.RegisterNodeServer(catapultNode, &MockNodeServer{})
-	catapultNode.Serve(lis)
-}
-
-var _ = Describe("Node", func() {
-	Var
+    go func() {
+        if err := catapultNode.Serve(lis); err != nil {
+            log.Fatal("failed to start grpc server", err)
+        }
+    }()
 }
 
 func TestNodeApi(t *testing.T) {
 	RegisterFailHandler(Fail)
 	setup()
 	RunSpecs(t, "Node Spec")
-
 }
 
 type MockNodeServer struct {
