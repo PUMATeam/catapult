@@ -21,6 +21,12 @@ Install pgcrypto extenstion
   CREATE EXTENSION 'pgcrypto'
 ```
 
+# Run
+```
+  ./catapult migrate
+  ./catapult serve
+```
+
 # FAQ
 > Will we succeed?
 
