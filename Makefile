@@ -5,7 +5,7 @@ GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
 GOGET=$(GOCMD) get
 BINARY=catapult
-BINARYPKG=cmd
+BINARYPKG=./cmd
 
 all: clean generate build test
 
