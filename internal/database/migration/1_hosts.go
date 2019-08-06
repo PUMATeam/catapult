@@ -8,7 +8,7 @@ import (
 
 func init() {
 	migrations.MustRegisterTx(func(db migrations.DB) error {
-		log.Println("Ceating table hosts...")
+		log.Info("Ceating table hosts...")
 		_, err := db.Exec(`CREATE TABLE hosts 
 							(id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 							 name VARCHAR(50), 
@@ -18,7 +18,7 @@ func init() {
 							 password TEXT)`)
 		return err
 	}, func(db migrations.DB) error {
-		log.Println("Dropping table hosts...")
+		log.Info("Dropping table hosts...")
 		_, err := db.Exec(`DROP TABLE hosts`)
 		return err
 	})

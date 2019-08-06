@@ -19,9 +19,9 @@ func Migrate(args []string) error {
 		return err
 	}
 	if newVersion != oldVersion {
-		log.Printf("migrated from version %d to %d\n", oldVersion, newVersion)
+		log.Infof("migrated from version %d to %d\n", oldVersion, newVersion)
 	} else {
-		log.Printf("version is %d\n", oldVersion)
+		log.Infof("version is %d\n", oldVersion)
 	}
 
 	return nil
@@ -44,7 +44,7 @@ func Reset() error {
 		if err != nil {
 			return err
 		}
-		log.Printf("migrated from version %d to %d\n", oldVersion, newVersion)
+		log.Infof("migrated from version %d to %d\n", oldVersion, newVersion)
 		version = newVersion
 	}
 

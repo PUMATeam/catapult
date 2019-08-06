@@ -66,7 +66,7 @@ func Start(h http.Handler) {
 	// TODO: add shutdown handling
 	err := server.ListenAndServe()
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 	}
 }
 

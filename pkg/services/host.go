@@ -55,10 +55,10 @@ func (hs *hostsService) AddHost(ctx context.Context, newHost NewHost) (uuid.UUID
 		return uuid.Nil, err
 	}
 
-	log.Info("Updating status of host", host.Name, "to up")
+	log.Infof("Updating status of host %v to up", host.Name)
 	err = hs.UpdateHostStatus(ctx, host, UP)
 	if err != nil {
-		log.Println("Failed to update status of host", host.Name, "to up")
+		log.Errorf("Failed to update status of host %v to up", host.Name)
 	}
 
 	return id, err
@@ -79,7 +79,7 @@ func (hs *hostsService) InstallHost(h model.Host) error {
 		util.StructToMap(hi, strings.ToLower))
 	err := ac.ExecuteAnsible()
 	if err != nil {
-		log.Println("Error during host install: ", err)
+		log.Error("Error during host install: ", err)
 		return err
 	}
 

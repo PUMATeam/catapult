@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"encoding/json"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 
 	"github.com/PUMATeam/catapult/pkg/services"
@@ -40,9 +39,7 @@ func addVMEndpoint(svc services.VMs) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(services.NewVM)
 		id, err := svc.AddVM(ctx, req)
-		log.Println("Returned from service.AddVM id", id)
 		resp := IDResponse{ID: id}
-		log.Println("Resp", resp)
 		return resp, err
 	}
 }
