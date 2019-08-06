@@ -3,9 +3,10 @@ package util
 import (
 	"bufio"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"os/exec"
 	"reflect"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // StructToMap converts a struct to a map
@@ -37,11 +38,11 @@ func StructToMap(in interface{}, f func(s string) string) map[string]string {
 // ExecuteCmd executes a shell command
 func ExecuteCmd(cmdName string, args []string) error {
 	cmd := exec.Command(cmdName, args...)
-	log.Printf("Running command %s", cmd.Args)
+	log.Debugf("Running command %s", cmd.Args)
 
 	cmdReader, err := cmd.StdoutPipe()
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 		return err
 	}
 	scanner := bufio.NewScanner(cmdReader)
@@ -51,10 +52,10 @@ func ExecuteCmd(cmdName string, args []string) error {
 		}
 	}()
 	if err := cmd.Start(); err != nil {
-		log.Println(err)
+		log.Error(err)
 	}
 	if err := cmd.Wait(); err != nil {
-		log.Println(err)
+		log.Error(err)
 	}
 
 	return nil

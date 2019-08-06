@@ -99,9 +99,9 @@ func (v *vmsService) VMByID(ctx context.Context, vmID uuid.UUID) (model.VM, erro
 
 func (v *vmsService) initNodeService() node.NodeService {
 	hosts, err := v.hostsRepository.ListHosts(context.TODO())
-	log.Println("hosts found: ", hosts)
+	log.Debug("hosts found: ", hosts)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 	}
 
 	for _, h := range hosts {
