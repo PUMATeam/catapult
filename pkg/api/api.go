@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 
 	log "github.com/sirupsen/logrus"
 
@@ -58,16 +60,30 @@ func Bootstrap(p int) http.Handler {
 // Start start the server and listens on the provided port
 func Start(h http.Handler) {
 	initLog()
+
 	server := http.Server{
 		Handler: h,
 		Addr:    ":" + strconv.Itoa(port),
 	}
 
-	// TODO: add shutdown handling
+	installSignal()
+
+	log.Infof("Starting server, listening on: %v", server.Addr)
 	err := server.ListenAndServe()
 	if err != nil {
 		log.Error(err)
 	}
+}
+
+func installSignal() {
+	var gracefulStop = make(chan os.Signal)
+	signal.Notify(gracefulStop, syscall.SIGTERM)
+	signal.Notify(gracefulStop, syscall.SIGINT)
+	go func() {
+		<-gracefulStop
+		log.Info("Exiting... ")
+		os.Exit(0)
+	}()
 }
 
 type IDResponse struct {
