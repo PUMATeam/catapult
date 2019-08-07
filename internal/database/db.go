@@ -3,6 +3,8 @@ package database
 import (
 	"fmt"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/BurntSushi/toml"
 	"github.com/go-pg/pg"
 	"github.com/spf13/viper"
@@ -31,6 +33,7 @@ func Connect() (*pg.DB, error) {
 	}
 
 	db := pg.Connect(opts)
+	db.AddQueryHook(dbLogger{})
 
 	return db, nil
 }
@@ -38,4 +41,14 @@ func Connect() (*pg.DB, error) {
 func connectionURL(opts config) string {
 	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		opts.User, opts.Password, opts.Host, opts.Port, opts.Database)
+}
+
+type dbLogger struct{}
+
+func (d dbLogger) BeforeQuery(q *pg.QueryEvent) {
+}
+
+func (d dbLogger) AfterQuery(q *pg.QueryEvent) {
+	s, _ := q.FormattedQuery()
+	log.Debugf("Executed %v", s)
 }
