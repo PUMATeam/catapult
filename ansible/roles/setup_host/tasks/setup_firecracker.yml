@@ -25,4 +25,3 @@
     mode: 0400
 
 - import_tasks: install_go.yml
-- import_tasks: build_firectl.yml
