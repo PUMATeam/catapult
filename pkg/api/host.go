@@ -38,6 +38,9 @@ func hostsEndpoints(r *chi.Mux, hs services.Hosts) {
 func addHostEndpoint(svc services.Hosts) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(services.NewHost)
+		if err := svc.Validate(ctx, req); err != nil {
+			return nil, err
+		}
 		id, err := svc.AddHost(ctx, req)
 		return IDResponse{ID: id}, err
 	}

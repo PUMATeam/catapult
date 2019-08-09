@@ -11,8 +11,8 @@ func init() {
 		log.Info("Ceating table hosts...")
 		_, err := db.Exec(`CREATE TABLE hosts 
 							(id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-							 name VARCHAR(50), 
-							 address VARCHAR(16),
+							 name VARCHAR(50) UNIQUE, 
+							 address VARCHAR(16) UNIQUE,
 							 status INT4,
 							 host_user VARCHAR(32),
 							 password TEXT)`)

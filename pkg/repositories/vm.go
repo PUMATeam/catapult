@@ -4,6 +4,8 @@ import (
 	"context"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/PUMATeam/catapult/pkg/model"
 	"github.com/go-pg/pg"
 	uuid "github.com/satori/go.uuid"
@@ -19,11 +21,18 @@ type vmsRepository struct {
 }
 
 func (v *vmsRepository) AddVM(ctx context.Context, vm model.VM) (uuid.UUID, error) {
-	err := v.db.WithContext(ctx).Insert(&vm)
+	tx, err := v.db.Begin()
+	if err != nil {
+		log.Error(err)
+	}
+	err = v.db.WithContext(ctx).Insert(&vm)
 
 	// TODO disgusting hack, find an actual solution
 	if err != nil && strings.Contains(err.Error(), "cannot convert") {
 		return vm.ID, nil
+	}
+	if err != nil {
+		return uuid.Nil, tx.Rollback()
 	}
 
 	return vm.ID, err

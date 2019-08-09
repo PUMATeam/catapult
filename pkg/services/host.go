@@ -31,18 +31,40 @@ func (hs *hostsService) ListHosts(ctx context.Context) ([]model.Host, error) {
 	return hs.hostsRepository.ListHosts(ctx)
 }
 
-func (hs *hostsService) UpdateHostStatus(ctx context.Context, host model.Host, status int) error {
+func (hs *hostsService) UpdateHostStatus(ctx context.Context, host model.Host, status model.Status) error {
 	host.Status = status
 	return hs.hostsRepository.UpdateHost(ctx, host)
 }
 
+func (hs *hostsService) Validate(ctx context.Context, host NewHost) error {
+	log.Infof("Validating host %v", host)
+	h, err := hs.hostsRepository.HostByAddress(ctx, host.Address)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	if h.ID != uuid.Nil {
+		log.Errorf("Host with address %s already exists", host.Address)
+		return ErrAlreadyExists
+	}
+	h, err = hs.hostsRepository.HostByName(ctx, host.Name)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	if h.ID != uuid.Nil {
+		log.Errorf("Host with name %s already exists", host.Name)
+		return ErrAlreadyExists
+	}
+
+	return nil
+}
+
 func (hs *hostsService) AddHost(ctx context.Context, newHost NewHost) (uuid.UUID, error) {
-	// TODO add validations and rollback in case ansible fails
-	// also, run within a worker pool framework
 	host := model.Host{
 		Name:    newHost.Name,
 		Address: newHost.Address,
-		Status:  DOWN,
+		Status:  model.INSTALLING,
 		User:    newHost.User,
 		// TODO: encrypt the password
 		Password: newHost.Password,
@@ -56,7 +78,7 @@ func (hs *hostsService) AddHost(ctx context.Context, newHost NewHost) (uuid.UUID
 	}
 
 	log.Infof("Updating status of host %v to up", host.Name)
-	err = hs.UpdateHostStatus(ctx, host, UP)
+	err = hs.UpdateHostStatus(ctx, host, model.UP)
 	if err != nil {
 		log.Errorf("Failed to update status of host %v to up", host.Name)
 	}
@@ -92,13 +114,6 @@ type NewHost struct {
 	User     string `json:"user"`
 	Password string `json:"password"`
 }
-
-// TODO: find a better way to do this
-const (
-	DOWN       int = 1
-	INSTALLING int = 2
-	UP         int = 3
-)
 
 type hostInstall struct {
 	User            string `json:"ignore"`

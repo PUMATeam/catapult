@@ -37,7 +37,7 @@ func (v *vmsService) AddVM(ctx context.Context, vm NewVM) (uuid.UUID, error) {
 		Name:           vm.Name,
 		VCPU:           vm.VCPU,
 		Memory:         vm.Memory,
-		Status:         DOWN,
+		Status:         model.DOWN,
 		HostID:         uuid.Nil,
 		KernelImage:    vm.Kernel,
 		RootFileSystem: vm.RootFileSystem,
@@ -66,7 +66,7 @@ func (v *vmsService) StartVM(ctx context.Context, vmID uuid.UUID) (*model.VM, er
 		return nil, err
 	}
 
-	v.UpdateVMStatus(ctx, vm, UP)
+	v.UpdateVMStatus(ctx, vm, model.UP)
 
 	return &vm, nil
 }
@@ -83,7 +83,7 @@ func (v *vmsService) ListVmsForHost(ctx context.Context, hostID uuid.UUID) ([]mo
 	return nil, nil
 }
 
-func (v *vmsService) UpdateVMStatus(ctx context.Context, vm model.VM, status int) error {
+func (v *vmsService) UpdateVMStatus(ctx context.Context, vm model.VM, status model.Status) error {
 	vm.Status = status
 	return v.vmsRepository.UpdateVM(ctx, vm)
 }
@@ -105,7 +105,7 @@ func (v *vmsService) initNodeService() node.NodeService {
 	}
 
 	for _, h := range hosts {
-		if h.Status == UP {
+		if h.Status == model.UP {
 			return node.NewNodeService(h)
 		}
 	}
