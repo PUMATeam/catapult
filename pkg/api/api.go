@@ -27,6 +27,9 @@ func initLog() {
 	// TODO make configurable
 	log.SetOutput(os.Stdout)
 	log.SetLevel(log.DebugLevel)
+	log.SetFormatter(&log.TextFormatter{
+		FullTimestamp: true,
+	})
 }
 
 func New(hs services.Hosts,
@@ -59,13 +62,12 @@ func Bootstrap(p int) http.Handler {
 
 // Start start the server and listens on the provided port
 func Start(h http.Handler) {
-	initLog()
-
 	server := http.Server{
 		Handler: h,
 		Addr:    ":" + strconv.Itoa(port),
 	}
 
+	initLog()
 	installSignal()
 
 	log.Infof("Starting server, listening on: %v", server.Addr)
