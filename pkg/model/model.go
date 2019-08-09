@@ -9,7 +9,7 @@ type Host struct {
 	ID       uuid.UUID `sql:"id,pk,type:uuid default gen_random_uuid()" json:"id"`
 	Name     string    `sql:"name,type:varchar(50)" json:"name"`
 	Address  string    `sql:"address,type:varchar(16)" json:"address"`
-	Status   int       `sql:"status,type:int4" json:"status"`
+	Status   Status    `sql:"status,type:int4" json:"status"`
 	User     string    `sql:"host_user,type:varchar(32)" json:"user"`
 	Password string    `sql:"password,type:text" json:"password"`
 }
@@ -18,10 +18,19 @@ type Host struct {
 type VM struct {
 	ID             uuid.UUID `sql:"id,pk,type:uuid default gen_random_uuid()" json:"id"`
 	Name           string    `sql:"name,type:varchar(50)" json:"name"`
-	Status         int       `sql:"status,type:int4" json:"status"`
+	Status         Status    `sql:"status,type:int4" json:"status"`
 	HostID         uuid.UUID `sql:"host_id,type:uuid" json:"host_id"`
 	VCPU           int64     `sql:"vcpu,type:int4" json:"vcpu"`
 	Memory         int64     `sql:"memory,type:int4" json:"memory"`
 	KernelImage    string    `sql:"kernel,type:varchar(255)" json:"kernel"`
 	RootFileSystem string    `sql:"root_file_system,type:varchar(255)" json:"rootfs"`
 }
+
+type Status int
+
+const (
+	DOWN       Status = 1
+	UP         Status = 2
+	INSTALLING Status = 3
+	UNKNOWN    Status = 4
+)
