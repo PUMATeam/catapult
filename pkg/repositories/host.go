@@ -6,7 +6,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/PUMATeam/catapult/pkg/model"
-	"github.com/go-pg/pg"
+	pg "github.com/go-pg/pg"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -50,6 +50,10 @@ func (h *hostsRepository) HostByAddress(ctx context.Context, address string) (*m
 		WhereStruct(host).
 		Select()
 	if err != nil {
+		if err == pg.ErrNoRows {
+			return host, nil
+		}
+
 		log.Error(err)
 		return nil, err
 	}
@@ -64,6 +68,10 @@ func (h *hostsRepository) HostByName(ctx context.Context, name string) (*model.H
 		WhereStruct(host).
 		Select()
 	if err != nil {
+		if err == pg.ErrNoRows {
+			return host, nil
+		}
+
 		log.Error(err)
 		return nil, err
 	}
