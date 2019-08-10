@@ -32,6 +32,7 @@ func (v *vmsRepository) AddVM(ctx context.Context, vm model.VM) (uuid.UUID, erro
 		return vm.ID, nil
 	}
 	if err != nil {
+		log.Error(err)
 		return uuid.Nil, tx.Rollback()
 	}
 
