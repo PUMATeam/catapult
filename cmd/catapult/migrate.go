@@ -12,7 +12,7 @@ var reset bool
 // migrateCmd represents the migrate command
 var migrateCmd = &cobra.Command{
 	Use:   "migrate",
-	Short: "exectute migrations",
+	Short: "execute migrations",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		argsMig := args[:0]
