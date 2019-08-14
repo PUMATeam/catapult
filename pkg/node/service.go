@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"google.golang.org/grpc/connectivity"
+
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 
@@ -32,9 +34,20 @@ func NewNodeService(host model.Host) NodeService {
 // StartVM starts an FC VM on the host
 func (n *Node) StartVM(ctx context.Context, vm model.VM) error {
 	// TODO: make port configurable
-	conn, err := grpc.Dial(fmt.Sprintf("%s:8888", n.host.Address), grpc.WithInsecure())
+	conn, err := grpc.Dial(fmt.Sprintf("%s:8001", n.host.Address),
+		grpc.WithInsecure())
 	if err != nil {
 		return err
+	}
+
+	defer conn.Close()
+
+	// Add a timeout and extract for reuse purposes
+	for {
+		if conn.GetState() == connectivity.Ready {
+			log.Info("Connection is ready")
+			break
+		}
 	}
 
 	uuid := &UUID{
