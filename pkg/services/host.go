@@ -72,7 +72,7 @@ func (hs *hostsService) AddHost(ctx context.Context, newHost NewHost) (uuid.UUID
 
 	id, err := hs.hostsRepository.AddHost(ctx, host)
 	host.ID = id
-	err = hs.InstallHost(host)
+	err = hs.InstallHost(host, newHost.LocalNodePath)
 	if err != nil {
 		return uuid.Nil, err
 	}
@@ -89,11 +89,12 @@ func (hs *hostsService) AddHost(ctx context.Context, newHost NewHost) (uuid.UUID
 // InstallHost installs prerequisits on the host
 // TODO: leaving it as public to allow a user add a host
 // without installing right away
-func (hs *hostsService) InstallHost(h model.Host) error {
+func (hs *hostsService) InstallHost(h model.Host, localNodePath string) error {
 	hi := hostInstall{
 		User:            h.User,
 		FcVersion:       fcVersion,
 		AnsiblePassword: h.Password,
+		LocalNodePath:   localNodePath,
 	}
 	ac := util.NewAnsibleCommand(util.SetupHostPlaybook,
 		h.User,
@@ -109,16 +110,18 @@ func (hs *hostsService) InstallHost(h model.Host) error {
 }
 
 type NewHost struct {
-	Name     string `json:"name"`
-	Address  string `json:"address"`
-	User     string `json:"user"`
-	Password string `json:"password"`
+	Name          string `json:"name"`
+	Address       string `json:"address"`
+	User          string `json:"user"`
+	Password      string `json:"password"`
+	LocalNodePath string `json:"local_node_path"`
 }
 
 type hostInstall struct {
 	User            string `json:"ignore"`
 	AnsiblePassword string `json:"ansible_ssh_pass"`
 	FcVersion       string
+	LocalNodePath   string `json:"local_node_path"`
 }
 
 // TODO make it configurable

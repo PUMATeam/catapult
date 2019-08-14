@@ -58,5 +58,5 @@ func ExecuteCmd(cmdName string, args []string) error {
 		log.Error(err)
 	}
 
-	return nil
+	return err
 }
