@@ -1,6 +1,0 @@
-- import_playbook: ../ansible/roles/setup_host/playbook.yml
-- hosts: vagrant
-  tasks:
-    - name: start firecracker VM
-      import_tasks: ../ansible/roles/start_vm/tasks/execute.yml
-      static: yes
