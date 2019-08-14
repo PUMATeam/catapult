@@ -1,29 +1,40 @@
-- name: clone catapult-node
-  git:
-    repo: https://github.com/PUMATeam/catapult-node.git
-    dest: src/catapult-node
-
 - name: check if catapult-node built
   stat:
     path: $HOME/catapult-node
   register: catapult
 
+- name: compile local catapult-node
+  shell: go build "{{ local_node_path }}"
+  args:
+    chdir: "{{ local_node_path }}"
+  delegate_to: localhost
+
+- name: copy catapult-node binary
+  copy:
+    src: "{{ local_node_path }}/catapult-node"
+    dest: $HOME/catapult-node
+  when: local_node_path is defined and not catapult.stat.exists
+
 - name: build catapult-node
   block:
-    - name: build catapult-node from source
-      shell: go build
-      args:
-        chdir: src/catapult-node
-      environment:
-        GOROOT: /usr/local/go
-        PATH: "/usr/local/go/bin:{{ ansible_env.PATH }}"
+  - name: clone catapult-node
+    git:
+      repo: https://github.com/PUMATeam/catapult-node.git
+      dest: src/catapult-node
+  - name: build catapult-node from source
+    shell: go build
+    args:
+      chdir: src/catapult-node
+    environment:
+      GOROOT: /usr/local/go
+      PATH: "/usr/local/go/bin:{{ ansible_env.PATH }}"
 
-    - name: copy catapult-node executable to $HOME
-      copy:
-        remote_src: yes
-        src: src/catapult-node/catapult-node
-        dest: $HOME/catapult-node
-  when: not catapult.stat.exists
+  - name: copy catapult-node executable to $HOME
+    copy:
+      remote_src: yes
+      src: src/catapult-node/catapult-node
+      dest: $HOME/catapult-node
+  when: not catapult.stat.exists and local_node_path is not defined
 
 - name: set correct permissions to catapult-node
   file:
