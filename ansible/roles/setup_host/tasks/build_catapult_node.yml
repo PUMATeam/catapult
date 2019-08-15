@@ -13,7 +13,7 @@
   copy:
     src: "{{ local_node_path }}/catapult-node"
     dest: $HOME/catapult-node
-  when: local_node_path is defined and not catapult.stat.exists
+  when: local_node_path is defined
 
 - name: build catapult-node
   block:
