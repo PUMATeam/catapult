@@ -125,4 +125,4 @@ type hostInstall struct {
 }
 
 // TODO make it configurable
-const fcVersion = "0.15.0"
+const fcVersion = "0.17.0"

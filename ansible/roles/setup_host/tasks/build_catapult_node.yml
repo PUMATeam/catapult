@@ -50,19 +50,11 @@
   debug:
     msg: "{{ catapult_node_running }}"
 
-- name: check if start_catapult_node.sh exists
-  stat:
-    path: ./start_catapult_node.sh
-  register: start_catapult_node
-
-
 - name: copy start_catapult_node.sh to host
   copy:
     src: ./files/start_catapult_node.sh
     dest: start_catapult_node.sh
     mode: u=rwx
-  when: not start_catapult_node.stat.exists
-
 
 - name: start catapult-node
   command: nohup ./start_catapult_node.sh &
