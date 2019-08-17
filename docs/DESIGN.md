@@ -15,10 +15,11 @@
 
 
 # Example requests
+```
 curl -XPOST http://localhost:8888/hosts -d '{ "name":"hosto", "address": "192.168.122.5", "user": "root", "password": "centos"}'
 
 curl -XPOST http://localhost:8888/vms/start -d '{ "id": "792a4940-49d1-4255-b31c-ed4a169dcc1c", "name": "hello", "status": 0, "host_id": "792a4940-49d1-4255-b31c-ed4a169dcc1c", "vcpu": 1, "memory":128}'
-
+```
 
 # Creating custom rootfs (with sshd)
 
