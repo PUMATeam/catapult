@@ -30,4 +30,4 @@ db.toml
 .idea/*
 /catapult
 
-/tests/os.img
+*os.img
