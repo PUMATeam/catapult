@@ -32,8 +32,9 @@ message HealthCheckResponse {
     HealthCheckState state = 1;
 
 }
+
 message VmList {
-    UUID vmID = 1;
+    repeated UUID vmID = 1;
 }
 
 service Node {
