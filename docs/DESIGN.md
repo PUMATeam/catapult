@@ -26,7 +26,7 @@ curl -XPOST http://localhost:8888/vms/start -d '{ "id": "792a4940-49d1-4255-b31c
 Currently I have to use ubuntu, trying to use Centos proved unlucky, might try with fedora later.
 
 ```
-$ truncate -s 1G rootfs 
+$ truncate -s 1G rootfs
 
 $ sudo mount rootfs /mnt/rootfs
 
@@ -55,6 +55,10 @@ $ brctl addif br0 fc-tap-$UUID
 $ ip link set fc-tap-$UUID up
  ```
 
-
-
-
+# Stuff to think about
+- How to load existing VMs when catapult-node starts?
+  - Use an sqlite3 db and consider it the only source of truth
+  - Scan the /var/vms
+  - Combine both options above - but adding a vms from /var/vms to the db
+might be challenging as it would require learning about the VM specifications
+from the API (there's no "virsh dumpxml") as far as I know
