@@ -41,7 +41,7 @@ func addHostEndpoint(svc services.Hosts) endpoint.Endpoint {
 		if err := svc.Validate(ctx, req); err != nil {
 			return nil, err
 		}
-		id, err := svc.AddHost(ctx, req)
+		id, err := svc.AddHost(ctx, &req)
 		return IDResponse{ID: id}, err
 	}
 }

@@ -22,6 +22,7 @@ var conf config
 
 // Connect connects to the database
 func Connect() (*pg.DB, error) {
+	// TODO maybe the config value should be passed instead?
 	_, err := toml.DecodeFile(viper.GetString("db_config"), &conf)
 	if err != nil {
 		return nil, err
