@@ -2,5 +2,4 @@ Host = "localhost"
 Port = "5432"
 User = "catapult"
 Password = "catapult"
-Database = "catapult"
-
+Database = "catapult_test"

@@ -24,7 +24,7 @@ test:
 .PHONY: clean
 clean:
 	$(GOCLEAN) $(BINARYPKG)
-	git clean -dfx -e .idea*
+	git clean -dfx -e .idea* -e *os.img -e db.toml
 
 .PHONY: generate
 generate:

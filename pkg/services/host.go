@@ -60,7 +60,7 @@ func (hs *hostsService) Validate(ctx context.Context, host NewHost) error {
 	return nil
 }
 
-func (hs *hostsService) AddHost(ctx context.Context, newHost NewHost) (uuid.UUID, error) {
+func (hs *hostsService) AddHost(ctx context.Context, newHost *NewHost) (uuid.UUID, error) {
 	host := model.Host{
 		Name:    newHost.Name,
 		Address: newHost.Address,
@@ -71,6 +71,10 @@ func (hs *hostsService) AddHost(ctx context.Context, newHost NewHost) (uuid.UUID
 	}
 
 	id, err := hs.hostsRepository.AddHost(ctx, host)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
 	host.ID = id
 	err = hs.InstallHost(host, newHost.LocalNodePath)
 	if err != nil {
@@ -96,6 +100,7 @@ func (hs *hostsService) InstallHost(h model.Host, localNodePath string) error {
 		AnsiblePassword: h.Password,
 		LocalNodePath:   localNodePath,
 	}
+	log.Infof("Installing host %s", h.Name)
 	ac := util.NewAnsibleCommand(util.SetupHostPlaybook,
 		h.User,
 		h.Address,

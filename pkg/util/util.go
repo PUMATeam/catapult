@@ -29,7 +29,11 @@ func StructToMap(in interface{}, f func(s string) string) map[string]string {
 		if tag != "" {
 			key = tag
 		}
-		out[key] = v.Field(i).String()
+
+		// Skip empty fields
+		if v.Field(i).String() != "" {
+			out[key] = v.Field(i).String()
+		}
 	}
 
 	return out

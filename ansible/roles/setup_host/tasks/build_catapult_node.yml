@@ -8,6 +8,7 @@
   args:
     chdir: "{{ local_node_path }}"
   delegate_to: localhost
+  when: local_node_path is defined
 
 - name: copy catapult-node binary
   copy:
