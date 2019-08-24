@@ -26,8 +26,7 @@ mac_address = sys.argv[4]
 
 network = conn.networkLookupByName(sys.argv[2])
 network_xml = network.XMLDesc(0)
-updated_network = 
-    update_network(dom_name, network_xml, mac_address, sys.argv[3])
+updated_network = update_network(dom_name, network_xml, mac_address, sys.argv[3])
 
 if network.isActive():
     network.destroy()
