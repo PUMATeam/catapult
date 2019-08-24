@@ -9,6 +9,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	api "github.com/PUMATeam/catapult/pkg/api"
+
 	"github.com/PUMATeam/catapult/internal/database"
 	"github.com/PUMATeam/catapult/internal/database/migration"
 	"github.com/PUMATeam/catapult/pkg/repositories"
@@ -16,18 +18,10 @@ import (
 )
 
 var repository repositories.Hosts
-
-func initLog() {
-	// TODO make configurable
-	log.SetOutput(os.Stdout)
-	log.SetLevel(log.DebugLevel)
-	log.SetFormatter(&log.TextFormatter{
-		FullTimestamp: true,
-	})
-}
+var logger *log.Logger
 
 func setupTest(t *testing.T) {
-	initLog()
+	logger = api.InitLog()
 
 	_, filename, _, _ := runtime.Caller(0)
 	dir := path.Join(path.Dir(filename), "../..")
@@ -67,7 +61,7 @@ func TestHostService(t *testing.T) {
 }
 
 func testAddHost(t *testing.T) {
-	svc := NewHostsService(repository)
+	svc := NewHostsService(repository, logger)
 	newHost := &NewHost{
 		Name: "test_host",
 		// TODO create the host as part of the setup
