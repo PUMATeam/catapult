@@ -2,6 +2,8 @@
 echo "Defining VM..."
 
 VM_NAME="fc_host"
+LIBVIRT_NETWORK="default"
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if virsh list --all | grep -q "${VM_NAME}"; then
     echo "${VM_NAME} is already installed... "
@@ -12,7 +14,7 @@ else
         --os-type=linux \
         --graphics spice \
         --noautoconsole \
-        --network bridge:virbr0 \
+        --network=default,model=virtio \
         --connect qemu:///system \
         --print-xml)
     echo $dom | virsh define /dev/stdin
@@ -24,9 +26,9 @@ if [  "${fc_host_status}" == 'running' ]; then
     exit 0
 fi
 
-#ip_address=192.168.122.45
-#mac_address=$(virsh dumpxml centos7 | grep "mac address" | awk -F\' '{ print $2}')
-#echo "Setting ip address to ${ip_address} for MAC address ${mac_address}"
-#./update_network.py centos7 default ${ip_address} $mac_address
+ip_address=192.168.122.45
+mac_address=$(virsh dumpxml "${VM_NAME}" | grep "mac address" | awk -F\' '{ print $2}')
+echo "Setting ip address to ${ip_address} for MAC address ${mac_address}"
+"${SCRIPTDIR}"/update_network.py ${VM_NAME} ${LIBVIRT_NETWORK} ${ip_address} ${mac_address}
 echo "starting ${VM_NAME}..."
 virsh start "${VM_NAME}"
