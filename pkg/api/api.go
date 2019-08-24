@@ -22,21 +22,12 @@ import (
 )
 
 var port int
-
-func initLog() {
-	// TODO make configurable
-	log.SetOutput(os.Stdout)
-	log.SetLevel(log.DebugLevel)
-	log.SetFormatter(&log.TextFormatter{
-		FullTimestamp: true,
-	})
-}
+var logger *log.Logger
 
 func New(hs services.Hosts,
 	vs services.VMs) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
-	r.Use(middleware.Logger)
 
 	hostsEndpoints(r, hs)
 	vmsEndpoints(r, vs)
@@ -46,16 +37,18 @@ func New(hs services.Hosts,
 
 func Bootstrap(p int) http.Handler {
 	port = p
+	logger = InitLog()
+
 	db, err := database.Connect()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	hr := repositories.NewHostsRepository(db)
-	hs := services.NewHostsService(hr)
+	hs := services.NewHostsService(hr, logger)
 
 	vr := repositories.NewVMsRepository(db)
-	vs := services.NewVMsService(vr, hr)
+	vs := services.NewVMsService(vr, hr, logger)
 
 	return New(hs, vs)
 }
@@ -70,10 +63,10 @@ func Start(h http.Handler) {
 	initLog()
 	installSignal()
 
-	log.Infof("Starting server, listening on: %v", server.Addr)
+	logger.Infof("Starting server, listening on: %v", server.Addr)
 	err := server.ListenAndServe()
 	if err != nil {
-		log.Error(err)
+		logger.Error(err)
 	}
 }
 

@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/go-chi/chi/middleware"
+
 	log "github.com/sirupsen/logrus"
 
 	"github.com/PUMATeam/catapult/pkg/model"
@@ -15,11 +17,12 @@ import (
 )
 
 // NewVMsService instantiates a new VM service
-func NewVMsService(vr repositories.VMs, hr repositories.Hosts) VMs {
+func NewVMsService(vr repositories.VMs, hr repositories.Hosts, logger *log.Logger) VMs {
 	// TODO this looks weird and wrong
 	vs := &vmsService{
 		vmsRepository:   vr,
 		hostsRepository: hr,
+		log:             logger,
 	}
 
 	return vs
@@ -28,6 +31,7 @@ func NewVMsService(vr repositories.VMs, hr repositories.Hosts) VMs {
 type vmsService struct {
 	vmsRepository   repositories.VMs
 	hostsRepository repositories.Hosts
+	log             *log.Logger
 }
 
 func (v *vmsService) AddVM(ctx context.Context, vm NewVM) (uuid.UUID, error) {
@@ -43,14 +47,18 @@ func (v *vmsService) AddVM(ctx context.Context, vm NewVM) (uuid.UUID, error) {
 		RootFileSystem: vm.RootFileSystem,
 	}
 
-	log.Debug("add vm", vmToAdd)
+	v.log.WithContext(ctx).
+		WithFields(log.Fields{
+			"requestID": ctx.Value(middleware.RequestIDKey),
+			"VM":        vmToAdd.Name,
+		}).Info("adding VM")
 	return v.vmsRepository.AddVM(ctx, vmToAdd)
 }
 
 func (v *vmsService) StartVM(ctx context.Context, vmID uuid.UUID) (*model.VM, error) {
 	// TODO: algorithm should be - look for a host in status up and run the
 	// VM on it
-	nodeService := v.initNodeService()
+	nodeService := v.initNodeService(ctx)
 	if nodeService == nil {
 		return nil, fmt.Errorf("Could not find host in status up")
 	}
@@ -97,9 +105,12 @@ func (v *vmsService) VMByID(ctx context.Context, vmID uuid.UUID) (model.VM, erro
 	return vm, nil
 }
 
-func (v *vmsService) initNodeService() node.NodeService {
+func (v *vmsService) initNodeService(ctx context.Context) node.NodeService {
 	hosts, err := v.hostsRepository.ListHosts(context.TODO())
-	log.Debug("hosts found: ", hosts)
+	v.log.WithContext(ctx).
+		WithFields(log.Fields{
+			"requestID": ctx.Value(middleware.RequestIDKey),
+		}).Info("hosts found: ", hosts)
 	if err != nil {
 		log.Error(err)
 	}

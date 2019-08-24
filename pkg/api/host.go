@@ -61,7 +61,7 @@ func hostByIDEndpoint(svc services.Hosts) endpoint.Endpoint {
 	}
 }
 
-func decodeAddHostReq(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeAddHostReq(ב_ context.Context, r *http.Request) (interface{}, error) {
 	defer r.Body.Close()
 	var host services.NewHost
 	err := json.NewDecoder(r.Body).Decode(&host)
