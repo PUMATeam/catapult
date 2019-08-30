@@ -27,8 +27,14 @@
     name: bridge-utils
     state: present
 
+- name: check if bridge present
+  shell: brctl show | grep fcbridge
+  register: fcbridge
+  ignore_errors: true
+
 - name: run bridge setup
   shell: ./setup_bridge.sh
+  when: fcbridge.rc == 1
 
 - name: install nmap
   package:
