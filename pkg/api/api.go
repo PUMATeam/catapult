@@ -60,7 +60,6 @@ func Start(h http.Handler) {
 		Addr:    ":" + strconv.Itoa(port),
 	}
 
-	initLog()
 	installSignal()
 
 	logger.Infof("Starting server, listening on: %v", server.Addr)
