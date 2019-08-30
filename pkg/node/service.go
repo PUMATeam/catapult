@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/go-chi/chi/middleware"
+
 	"google.golang.org/grpc/connectivity"
 
 	log "github.com/sirupsen/logrus"
@@ -17,7 +19,7 @@ import (
 type NodeService interface {
 	ListVMs() ([]uuid.UUID, error)
 	StartVM(ctx context.Context, vm model.VM) error
-	StopVM(vmId uuid.UUID) error
+	StopVM(vmID uuid.UUID) error
 }
 
 type Node struct {
@@ -67,15 +69,21 @@ func (n *Node) StartVM(ctx context.Context, vm model.VM) error {
 		log.Error("grpc error: ", err)
 	}
 
-	log.Debug("grpc response:", resp)
+	log.WithContext(ctx).
+		WithFields(log.Fields{
+			"requestID": ctx.Value(middleware.RequestIDKey),
+			"vm":        vm.Name,
+		}).Infof("Returned VM %v", resp.GetConfig())
 
 	return nil
 }
 
+// ListVMs lists VMs available on a node
 func (n *Node) ListVMs() ([]uuid.UUID, error) {
 	return nil, nil
 }
 
-func (n *Node) StopVM(vmId uuid.UUID) error {
+// StopVM stops a running VM
+func (n *Node) StopVM(vmID uuid.UUID) error {
 	return nil
 }

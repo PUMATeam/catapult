@@ -2,16 +2,6 @@ syntax = "proto3";
 
 import "google/protobuf/empty.proto";
 
-enum RequestStatus {
-    SUCCESSFUL = 0;
-    FAILED = 1;
-}
-
-enum HealthCheckState {
-    DOWN = 0;
-    UP =1;
-}
-
 message UUID {
     string value = 1;
 }
@@ -22,15 +12,17 @@ message VmConfig {
     int64 vcpus = 3;
     string kernelImage = 4;
     string rootFileSystem = 5;
+    string address = 6;
 }
 
 message Response {
+    enum RequestStatus {
+        SUCCESSFUL = 0;
+        FAILED = 1;
+    }
+
     RequestStatus status = 1;
-}
-
-message HealthCheckResponse {
-    HealthCheckState state = 1;
-
+    VmConfig config = 2;
 }
 
 message VmList {
@@ -41,5 +33,4 @@ service Node {
     rpc StartVM(VmConfig) returns (Response) {}
     rpc StopVM(UUID) returns (Response) {}
     rpc ListVMs(google.protobuf.Empty) returns (VmList) {}
-    rpc Health(google.protobuf.Empty) returns (HealthCheckResponse) {}
 }
