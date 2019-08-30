@@ -33,4 +33,5 @@ const (
 	UP         Status = 2
 	INSTALLING Status = 3
 	UNKNOWN    Status = 4
+	FAILED	   Status = 5
 )
