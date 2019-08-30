@@ -35,7 +35,7 @@ func (hs *hostsService) ListHosts(ctx context.Context) ([]model.Host, error) {
 	return hs.hostsRepository.ListHosts(ctx)
 }
 
-func (hs *hostsService) UpdateHostStatus(ctx context.Context, host model.Host, status model.Status) error {
+func (hs *hostsService) updateHostStatus(ctx context.Context, host model.Host, status model.Status) error {
 	host.Status = status
 	return hs.hostsRepository.UpdateHost(ctx, host)
 }
@@ -53,7 +53,7 @@ func (hs *hostsService) Validate(ctx context.Context, host NewHost) error {
 		hs.log.Error(err)
 		return err
 	}
-	if h.ID != uuid.Nil {
+	if h.ID != uuid.Nil && h.Status != model.FAILED {
 		hs.log.WithContext(ctx).
 			WithFields(log.Fields{
 				"requestID": ctx.Value(middleware.RequestIDKey),
@@ -66,7 +66,7 @@ func (hs *hostsService) Validate(ctx context.Context, host NewHost) error {
 		log.Error(err)
 		return err
 	}
-	if h.ID != uuid.Nil {
+	if h.ID != uuid.Nil && h.Status != model.FAILED {
 		hs.log.WithContext(ctx).
 			WithFields(log.Fields{
 				"requestID": ctx.Value(middleware.RequestIDKey),
@@ -95,38 +95,24 @@ func (hs *hostsService) AddHost(ctx context.Context, newHost *NewHost) (uuid.UUI
 	}
 
 	host.ID = id
-	err = hs.InstallHost(ctx, host, newHost.LocalNodePath)
+	go hs.InstallHost(ctx, host, newHost.LocalNodePath)
 	if err != nil {
 		return uuid.Nil, err
 	}
-	hs.log.WithContext(ctx).
-		WithFields(log.Fields{
-			"requestID": ctx.Value(middleware.RequestIDKey),
-			"host":      host.Name,
-		}).Info("Updating status of host to up")
-
-	err = hs.UpdateHostStatus(ctx, host, model.UP)
-	if err != nil {
-		hs.log.WithContext(ctx).
-			WithFields(log.Fields{
-				"requestID": ctx.Value(middleware.RequestIDKey),
-				"host":      host.Name,
-			}).Error("Failed to update status of host to up")
-	}
-
 	return id, err
 }
 
 // InstallHost installs prerequisits on the host
 // TODO: leaving it as public to allow a user add a host
 // without installing right away
-func (hs *hostsService) InstallHost(ctx context.Context, h model.Host, localNodePath string) error {
+func (hs *hostsService) InstallHost(ctx context.Context, h model.Host, localNodePath string) {
 	hi := hostInstall{
 		User:            h.User,
 		FcVersion:       fcVersion,
 		AnsiblePassword: h.Password,
 		LocalNodePath:   localNodePath,
 	}
+
 	hs.log.WithContext(ctx).
 		WithFields(log.Fields{
 			"requestID": ctx.Value(middleware.RequestIDKey),
@@ -136,6 +122,7 @@ func (hs *hostsService) InstallHost(ctx context.Context, h model.Host, localNode
 		h.User,
 		h.Address,
 		util.StructToMap(hi, strings.ToLower))
+
 	err := ac.ExecuteAnsible()
 	if err != nil {
 		hs.log.WithContext(ctx).
@@ -143,6 +130,27 @@ func (hs *hostsService) InstallHost(ctx context.Context, h model.Host, localNode
 				"requestID": ctx.Value(middleware.RequestIDKey),
 				"host":      h.Name,
 			}).Error("Error during host install: ", err)
+		hs.UpdateHostStatus(ctx, h, model.FAILED)
+		return
+	}
+
+	hs.UpdateHostStatus(ctx, h, model.UP)
+}
+
+func (hs *hostsService) UpdateHostStatus(ctx context.Context, host model.Host, status model.Status) error {
+	hs.log.WithContext(ctx).
+		WithFields(log.Fields{
+			"requestID": ctx.Value(middleware.RequestIDKey),
+			"host":      host.Name,
+		}).Infof("Updating status of host to %d", status)
+
+	err := hs.updateHostStatus(ctx, host, model.UP)
+	if err != nil {
+		hs.log.WithContext(ctx).
+			WithFields(log.Fields{
+				"requestID": ctx.Value(middleware.RequestIDKey),
+				"host":      host.Name,
+			}).Errorf("Failed to update status of host to %d", status)
 		return err
 	}
 
