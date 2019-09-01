@@ -14,6 +14,7 @@ type Hosts interface {
 	ListHosts(ctx context.Context) ([]model.Host, error)
 	AddHost(ctx context.Context, host *NewHost) (uuid.UUID, error)
 	UpdateHostStatus(ctx context.Context, host model.Host, status model.Status) error
+	InstallHost(ctx context.Context, h model.Host, localNodePath string)
 }
 
 type VMs interface {
