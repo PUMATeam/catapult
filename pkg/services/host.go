@@ -95,10 +95,6 @@ func (hs *hostsService) AddHost(ctx context.Context, newHost *NewHost) (uuid.UUI
 	}
 
 	host.ID = id
-	go hs.InstallHost(ctx, host, newHost.LocalNodePath)
-	if err != nil {
-		return uuid.Nil, err
-	}
 	return id, err
 }
 
@@ -163,6 +159,7 @@ type NewHost struct {
 	User          string `json:"user"`
 	Password      string `json:"password"`
 	LocalNodePath string `json:"local_node_path"`
+	ShouldInstall bool   `json:"-"`
 }
 
 type hostInstall struct {

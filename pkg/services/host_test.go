@@ -7,9 +7,7 @@ import (
 	"runtime"
 	"testing"
 
-	log "github.com/sirupsen/logrus"
-
-	api "github.com/PUMATeam/catapult/pkg/api"
+	logrus "github.com/sirupsen/logrus"
 
 	"github.com/PUMATeam/catapult/internal/database"
 	"github.com/PUMATeam/catapult/internal/database/migration"
@@ -18,10 +16,21 @@ import (
 )
 
 var repository repositories.Hosts
-var logger *log.Logger
+var logger *logrus.Logger
+
+func initLog() *logrus.Logger {
+	// TODO make configurable
+	logger := logrus.New()
+	logger.SetOutput(os.Stdout)
+	logger.SetLevel(logrus.DebugLevel)
+	logger.Formatter = &logrus.TextFormatter{
+		FullTimestamp: true,
+	}
+	return logger
+}
 
 func setupTest(t *testing.T) {
-	logger = api.InitLog()
+	logger = initLog()
 
 	_, filename, _, _ := runtime.Caller(0)
 	dir := path.Join(path.Dir(filename), "../..")
@@ -63,16 +72,21 @@ func TestHostService(t *testing.T) {
 func testAddHost(t *testing.T) {
 	svc := NewHostsService(repository, logger)
 	newHost := &NewHost{
-		Name: "test_host",
-		// TODO create the host as part of the setup
-		Address:  "192.168.122.155",
+		Name:     "test_host",
+		Address:  "192.168.122.45",
 		User:     "root",
 		Password: "centos",
 	}
-	id, err := svc.AddHost(context.Background(), newHost)
+	ctx := context.Background()
+	id, err := svc.AddHost(ctx, newHost)
 	if err != nil {
 		t.Error(err)
 	}
 
-	t.Logf("Created host %s", id)
+	h, err := svc.HostByID(ctx, id)
+	if err != nil {
+		t.Error(err)
+	}
+
+	t.Logf("Created host %s", h.ID)
 }

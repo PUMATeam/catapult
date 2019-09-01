@@ -42,6 +42,14 @@ func addHostEndpoint(svc services.Hosts) endpoint.Endpoint {
 			return nil, err
 		}
 		id, err := svc.AddHost(ctx, &req)
+		if req.ShouldInstall {
+			h, err := svc.HostByID(ctx, id)
+			if err != nil {
+				return IDResponse{ID: id}, err
+			}
+
+			go svc.InstallHost(ctx, *h, req.LocalNodePath)
+		}
 		return IDResponse{ID: id}, err
 	}
 }
@@ -61,10 +69,16 @@ func hostByIDEndpoint(svc services.Hosts) endpoint.Endpoint {
 	}
 }
 
-func decodeAddHostReq(ב_ context.Context, r *http.Request) (interface{}, error) {
+func decodeAddHostReq(_ context.Context, r *http.Request) (interface{}, error) {
 	defer r.Body.Close()
 	var host services.NewHost
 	err := json.NewDecoder(r.Body).Decode(&host)
+
+	install := r.URL.Query().Get("install")
+	if install != "" && install == "true" {
+		host.ShouldInstall = true
+	}
+
 	return host, err
 }
 
