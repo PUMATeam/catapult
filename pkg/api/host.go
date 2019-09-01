@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/go-chi/chi/middleware"
+	"github.com/sirupsen/logrus"
+
 	"github.com/PUMATeam/catapult/pkg/services"
 	"github.com/go-chi/chi"
 	"github.com/go-kit/kit/endpoint"
@@ -42,12 +45,23 @@ func addHostEndpoint(svc services.Hosts) endpoint.Endpoint {
 			return nil, err
 		}
 		id, err := svc.AddHost(ctx, &req)
+		logger.
+			WithContext(ctx).
+			WithFields(logrus.Fields{
+				"requestID": ctx.Value(middleware.RequestIDKey),
+				"host":      req.Name,
+			}).Info("Added host")
 		if req.ShouldInstall {
 			h, err := svc.HostByID(ctx, id)
 			if err != nil {
 				return IDResponse{ID: id}, err
 			}
-
+			logger.
+				WithContext(ctx).
+				WithFields(logrus.Fields{
+					"requestID": ctx.Value(middleware.RequestIDKey),
+					"host":      req.Name,
+				}).Info("Installing host")
 			go svc.InstallHost(ctx, *h, req.LocalNodePath)
 		}
 		return IDResponse{ID: id}, err

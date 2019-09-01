@@ -109,11 +109,6 @@ func (hs *hostsService) InstallHost(ctx context.Context, h model.Host, localNode
 		LocalNodePath:   localNodePath,
 	}
 
-	hs.log.WithContext(ctx).
-		WithFields(log.Fields{
-			"requestID": ctx.Value(middleware.RequestIDKey),
-			"host":      h.Name,
-		}).Infof("Installing host")
 	ac := util.NewAnsibleCommand(util.SetupHostPlaybook,
 		h.User,
 		h.Address,
