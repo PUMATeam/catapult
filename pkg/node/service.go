@@ -23,20 +23,20 @@ type NodeService interface {
 }
 
 type Node struct {
-	host model.Host
+	Host model.Host
 }
 
 // NewNodeService creates a Node instance
 func NewNodeService(host model.Host) NodeService {
 	return &Node{
-		host: host,
+		Host: host,
 	}
 }
 
 // StartVM starts an FC VM on the host
 func (n *Node) StartVM(ctx context.Context, vm model.VM) error {
 	// TODO: make port configurable
-	conn, err := grpc.Dial(fmt.Sprintf("%s:8001", n.host.Address),
+	conn, err := grpc.Dial(fmt.Sprintf("%s:8001", n.Host.Address),
 		grpc.WithInsecure())
 	if err != nil {
 		return err
