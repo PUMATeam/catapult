@@ -58,7 +58,7 @@ func (v *vmsService) AddVM(ctx context.Context, vm NewVM) (uuid.UUID, error) {
 func (v *vmsService) StartVM(ctx context.Context, vmID uuid.UUID) (*model.VM, error) {
 	// TODO: algorithm should be - look for a host in status up and run the
 	// VM on it
-	nodeService := v.initNodeService(ctx)
+	nodeService, hostID := v.initNodeService(ctx)
 	if nodeService == nil {
 		return nil, fmt.Errorf("Could not find host in status up")
 	}
@@ -74,7 +74,8 @@ func (v *vmsService) StartVM(ctx context.Context, vmID uuid.UUID) (*model.VM, er
 		return nil, err
 	}
 
-	v.UpdateVMStatus(ctx, vm, model.UP)
+	vm.HostID = hostID
+	v.UpdateVMStatus(ctx, &vm, model.UP)
 
 	return &vm, nil
 }
@@ -84,6 +85,7 @@ func (v *vmsService) ListVms(ctx context.Context) ([]model.VM, error) {
 }
 
 func (v *vmsService) StopVM(ctx context.Context, host NewHost) (uuid.UUID, error) {
+	
 	return uuid.Nil, nil
 }
 
@@ -91,9 +93,9 @@ func (v *vmsService) ListVmsForHost(ctx context.Context, hostID uuid.UUID) ([]mo
 	return nil, nil
 }
 
-func (v *vmsService) UpdateVMStatus(ctx context.Context, vm model.VM, status model.Status) error {
+func (v *vmsService) UpdateVMStatus(ctx context.Context, vm *model.VM, status model.Status) error {
 	vm.Status = status
-	return v.vmsRepository.UpdateVM(ctx, vm)
+	return v.vmsRepository.UpdateVM(ctx, *vm)
 }
 
 func (v *vmsService) VMByID(ctx context.Context, vmID uuid.UUID) (model.VM, error) {
@@ -105,7 +107,7 @@ func (v *vmsService) VMByID(ctx context.Context, vmID uuid.UUID) (model.VM, erro
 	return vm, nil
 }
 
-func (v *vmsService) initNodeService(ctx context.Context) node.NodeService {
+func (v *vmsService) initNodeService(ctx context.Context) node.NodeService, uuid.UUID {
 	hosts, err := v.hostsRepository.ListHosts(context.TODO())
 	v.log.WithContext(ctx).
 		WithFields(log.Fields{
@@ -117,11 +119,11 @@ func (v *vmsService) initNodeService(ctx context.Context) node.NodeService {
 
 	for _, h := range hosts {
 		if h.Status == model.UP {
-			return node.NewNodeService(h)
+			return node.NewNodeService(h), h.hostID
 		}
 	}
 
-	return nil
+	return nil, uuid.Nil
 }
 
 type NewVM struct {

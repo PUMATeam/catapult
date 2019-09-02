@@ -33,6 +33,13 @@ func vmsEndpoints(r *chi.Mux, vs services.VMs) {
 		encodeResponse,
 	)
 	r.Method(http.MethodGet, "/vms", listVMsHandler)
+
+	stopVMHandler := httptransport.NewServer(
+		stopVMEndpoint(vs),
+		decodeVMByIDRequest,
+		encodeResponse,
+	)
+	r.Method(http.MethodPost, "/vms/{vmID}/stop", stopVMHandler)
 }
 
 func addVMEndpoint(svc services.VMs) endpoint.Endpoint {
@@ -55,6 +62,18 @@ func startVMEndpoint(vs services.VMs) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		reqID := request.(uuid.UUID)
 		vm, err := vs.StartVM(ctx, reqID)
+		return vm, err
+	}
+}
+
+func stopVMEndpoint(vs services.VMs) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		reqID := request.(uuid.UUID)
+		vm, err := vs.VMByID(ctx, reqID)
+		if err != nil {
+			return nil, err
+		}
+		_, err = vs.StopVM(ctx, vm)
 		return vm, err
 	}
 }
