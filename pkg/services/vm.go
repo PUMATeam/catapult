@@ -4,13 +4,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/PUMATeam/catapult/pkg/node"
+
 	"github.com/go-chi/chi/middleware"
 
 	log "github.com/sirupsen/logrus"
 
 	"github.com/PUMATeam/catapult/pkg/model"
-
-	"github.com/PUMATeam/catapult/pkg/node"
 
 	"github.com/PUMATeam/catapult/pkg/repositories"
 	uuid "github.com/satori/go.uuid"
@@ -58,10 +58,12 @@ func (v *vmsService) AddVM(ctx context.Context, vm NewVM) (uuid.UUID, error) {
 func (v *vmsService) StartVM(ctx context.Context, vmID uuid.UUID) (*model.VM, error) {
 	// TODO: algorithm should be - look for a host in status up and run the
 	// VM on it
-	nodeService, hostID := v.initNodeService(ctx)
-	if nodeService == nil {
+	h := v.findHostUP(ctx)
+	if h == nil {
 		return nil, fmt.Errorf("Could not find host in status up")
 	}
+
+	nodeService := node.NewNodeService(h)
 
 	vm, err := v.VMByID(ctx, vmID)
 	if err != nil {
@@ -74,7 +76,7 @@ func (v *vmsService) StartVM(ctx context.Context, vmID uuid.UUID) (*model.VM, er
 		return nil, err
 	}
 
-	vm.HostID = hostID
+	vm.HostID = h.ID
 	v.UpdateVMStatus(ctx, &vm, model.UP)
 
 	return &vm, nil
@@ -84,9 +86,19 @@ func (v *vmsService) ListVms(ctx context.Context) ([]model.VM, error) {
 	return v.vmsRepository.ListVMs(ctx)
 }
 
-func (v *vmsService) StopVM(ctx context.Context, host NewHost) (uuid.UUID, error) {
-	
-	return uuid.Nil, nil
+func (v *vmsService) StopVM(ctx context.Context, vm *model.VM) (uuid.UUID, error) {
+	h, err := v.hostsRepository.HostByID(ctx, vm.HostID)
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("Host %s not found", vm.HostID)
+	}
+
+	nodeService := node.NewNodeService(h)
+	err = nodeService.StopVM(vm.ID)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return vm.ID, nil
 }
 
 func (v *vmsService) ListVmsForHost(ctx context.Context, hostID uuid.UUID) ([]model.VM, error) {
@@ -107,7 +119,7 @@ func (v *vmsService) VMByID(ctx context.Context, vmID uuid.UUID) (model.VM, erro
 	return vm, nil
 }
 
-func (v *vmsService) initNodeService(ctx context.Context) node.NodeService, uuid.UUID {
+func (v *vmsService) findHostUP(ctx context.Context) *model.Host {
 	hosts, err := v.hostsRepository.ListHosts(context.TODO())
 	v.log.WithContext(ctx).
 		WithFields(log.Fields{
@@ -119,11 +131,11 @@ func (v *vmsService) initNodeService(ctx context.Context) node.NodeService, uuid
 
 	for _, h := range hosts {
 		if h.Status == model.UP {
-			return node.NewNodeService(h), h.hostID
+			return &h
 		}
 	}
 
-	return nil, uuid.Nil
+	return nil
 }
 
 type NewVM struct {
