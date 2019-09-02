@@ -73,7 +73,7 @@ func stopVMEndpoint(vs services.VMs) endpoint.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		_, err = vs.StopVM(ctx, vm)
+		_, err = vs.StopVM(ctx, &vm)
 		return vm, err
 	}
 }

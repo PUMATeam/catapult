@@ -23,11 +23,11 @@ type NodeService interface {
 }
 
 type Node struct {
-	Host model.Host
+	Host *model.Host
 }
 
 // NewNodeService creates a Node instance
-func NewNodeService(host model.Host) NodeService {
+func NewNodeService(host *model.Host) NodeService {
 	return &Node{
 		Host: host,
 	}

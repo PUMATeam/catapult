@@ -22,7 +22,7 @@ type VMs interface {
 	StartVM(ctx context.Context, id uuid.UUID) (*model.VM, error)
 	ListVms(ctx context.Context) ([]model.VM, error)
 	ListVmsForHost(ctx context.Context, hostID uuid.UUID) ([]model.VM, error)
-	StopVM(ctx context.Context, vm model.VM) (uuid.UUID, error)
+	StopVM(ctx context.Context, vm *model.VM) (uuid.UUID, error)
 	UpdateVMStatus(ctx context.Context, vm *model.VM, status model.Status) error
 	VMByID(ctx context.Context, vmID uuid.UUID) (model.VM, error)
 }
