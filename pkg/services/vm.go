@@ -93,7 +93,7 @@ func (v *vmsService) StopVM(ctx context.Context, vm *model.VM) (uuid.UUID, error
 	}
 
 	nodeService := node.NewNodeService(h)
-	err = nodeService.StopVM(vm.ID)
+	err = nodeService.StopVM(ctx, 	vm.ID)
 	if err != nil {
 		return uuid.Nil, err
 	}

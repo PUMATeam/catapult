@@ -17,9 +17,9 @@ import (
 
 // NodeService exposes operations to perform on a host
 type NodeService interface {
-	ListVMs() ([]uuid.UUID, error)
+	ListVMs(ctx context.Context) ([]uuid.UUID, error)
 	StartVM(ctx context.Context, vm model.VM) error
-	StopVM(vmID uuid.UUID) error
+	StopVM(ctx context.Context, vmID uuid.UUID) error
 }
 
 type Node struct {
@@ -35,23 +35,6 @@ func NewNodeService(host *model.Host) NodeService {
 
 // StartVM starts an FC VM on the host
 func (n *Node) StartVM(ctx context.Context, vm model.VM) error {
-	// TODO: make port configurable
-	conn, err := grpc.Dial(fmt.Sprintf("%s:8001", n.Host.Address),
-		grpc.WithInsecure())
-	if err != nil {
-		return err
-	}
-
-	defer conn.Close()
-
-	// Add a timeout and extract for reuse purposes
-	for {
-		if conn.GetState() == connectivity.Ready {
-			log.Info("Connection is ready")
-			break
-		}
-	}
-
 	uuid := &UUID{
 		Value: vm.ID.String(),
 	}
@@ -63,6 +46,13 @@ func (n *Node) StartVM(ctx context.Context, vm model.VM) error {
 		KernelImage:    vm.KernelImage,
 		RootFileSystem: vm.RootFileSystem,
 	}
+
+	// TODO: make port configurable
+	conn, err := connectToNode(n.Host.Address, "8001")
+	if err != nil {
+		return err
+	}
+
 	client := NewNodeClient(conn)
 	resp, err := client.StartVM(ctx, vmConfig)
 	if err != nil {
@@ -79,11 +69,45 @@ func (n *Node) StartVM(ctx context.Context, vm model.VM) error {
 }
 
 // ListVMs lists VMs available on a node
-func (n *Node) ListVMs() ([]uuid.UUID, error) {
+func (n *Node) ListVMs(ctx context.Context) ([]uuid.UUID, error) {
 	return nil, nil
 }
 
 // StopVM stops a running VM
-func (n *Node) StopVM(vmID uuid.UUID) error {
-	return nil
+func (n *Node) StopVM(ctx context.Context, vmID uuid.UUID) error {
+	conn, err := connectToNode(n.Host.Address, "8001")
+	if err != nil {
+		return err
+	}
+
+	uuid := &UUID{
+		Value: vmID.String(),
+	}
+	client := NewNodeClient(conn)
+	resp, err := client.StopVM(ctx, uuid)
+
+	log.WithContext(ctx).
+	WithFields(log.Fields{
+		"requestID": ctx.Value(middleware.RequestIDKey),
+		"vm":        vmID,
+	}).Infof("Stopped VM %v", resp.GetConfig())
+
+
+	return err
+}
+
+func connectToNode(address string, port string) (*grpc.ClientConn, error) {
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", address, port),
+		grpc.WithInsecure())
+	if err != nil {
+		return nil, err
+	}
+
+	// Add a timeout and extract for reuse purposes
+	for {
+		if conn.GetState() == connectivity.Ready {
+			log.Info("Connection is ready")
+			return conn, nil
+		}
+	}
 }
