@@ -21,8 +21,6 @@ require (
 	github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/onsi/ginkgo v1.8.0
 	github.com/onsi/gomega v1.5.0
 	github.com/prometheus/client_golang v1.1.0 // indirect
