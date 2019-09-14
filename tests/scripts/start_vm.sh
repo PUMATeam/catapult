@@ -31,9 +31,9 @@ echo "Setting IP address to ${VM_IP} for MAC address ${MAC_ADDRESS}"
 
 xml_entry="<host mac=\"${MAC_ADDRESS}\" name=\"${VM_NAME}\" ip=\"${VM_IP}\"/>"
 if virsh net-dumpxml "${LIBVIRT_NETWORK}" | grep -q "${VM_NAME}"; then
-    virsh net-update default add-last ip-dhcp-host "${xml_entry}" --live --config
-else
     echo "IP address is already configured"
+else
+    virsh net-update default add-last ip-dhcp-host "${xml_entry}" --live --config
 fi
 
 echo "starting ${VM_NAME}..."
