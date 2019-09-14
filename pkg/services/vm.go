@@ -71,13 +71,15 @@ func (v *vmsService) StartVM(ctx context.Context, vmID uuid.UUID) (*model.VM, er
 		return nil, err
 	}
 
-	err = nodeService.StartVM(ctx, vm)
+	cfg, err := nodeService.StartVM(ctx, vm)
 	if err != nil {
 		return nil, err
 	}
 
 	vm.HostID = h.ID
-	v.UpdateVMStatus(ctx, &vm, model.UP)
+	vm.Address = cfg.GetAddress()
+	vm.Status = model.UP
+	v.vmsRepository.UpdateVM(ctx, vm)
 
 	return &vm, nil
 }
@@ -93,7 +95,7 @@ func (v *vmsService) StopVM(ctx context.Context, vm *model.VM) (uuid.UUID, error
 	}
 
 	nodeService := node.NewNodeService(h)
-	err = nodeService.StopVM(ctx, 	vm.ID)
+	err = nodeService.StopVM(ctx, vm.ID)
 	if err != nil {
 		return uuid.Nil, err
 	}
