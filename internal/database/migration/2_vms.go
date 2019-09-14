@@ -17,7 +17,8 @@ func init() {
 							 vcpu INTEGER,
 							 memory INTEGER,
 							 kernel VARCHAR(255),
-							 root_file_system VARCHAR(255))`)
+							 root_file_system VARCHAR(255),
+							 address VARCHAR(16) UNIQUE)`)
 		return err
 	}, func(db migrations.DB) error {
 		log.Info("Dropping table vms...")
