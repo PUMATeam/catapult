@@ -24,14 +24,15 @@ type VM struct {
 	Memory         int64     `sql:"memory,type:int4" json:"memory"`
 	KernelImage    string    `sql:"kernel,type:varchar(255)" json:"kernel"`
 	RootFileSystem string    `sql:"root_file_system,type:varchar(255)" json:"rootfs"`
+	Address        string    `sql:"address,type:varchar(16)" json:"address"`
 }
 
 type Status int
 
 const (
-	DOWN       Status = 1
-	UP         Status = 2
-	INSTALLING Status = 3
-	UNKNOWN    Status = 4
-	FAILED	   Status = 5
+	UNKNOWN Status = iota
+	DOWN
+	UP
+	INSTALLING
+	FAILED
 )
