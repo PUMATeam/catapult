@@ -53,7 +53,7 @@ func (n *Node) StartVM(ctx context.Context, vm model.VM) (*VmConfig, error) {
 		return client.StartVM(ctx, vmConfig)
 	}
 
-	resp, err := runOnNode(n.Host.Address, "8001", f)
+	resp, err := runOnNode(n.Host, f)
 
 	log.WithContext(ctx).
 		WithFields(log.Fields{
@@ -79,7 +79,7 @@ func (n *Node) StopVM(ctx context.Context, vmID uuid.UUID) error {
 		client := NewNodeClient(conn)
 		return client.StopVM(ctx, uuid)
 	}
-	resp, err := runOnNode(n.Host.Address, "8001", f)
+	resp, err := runOnNode(n.Host, f)
 
 	log.WithContext(ctx).
 		WithFields(log.Fields{
@@ -92,8 +92,8 @@ func (n *Node) StopVM(ctx context.Context, vmID uuid.UUID) error {
 
 type executeOnNode func(conn *grpc.ClientConn) (*Response, error)
 
-func runOnNode(address string, port string, f executeOnNode) (*Response, error) {
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%s", address, port),
+func runOnNode(host *model.Host, f executeOnNode) (*Response, error) {
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", host.Address, host.Port),
 		grpc.WithInsecure())
 	if err != nil {
 		return nil, err

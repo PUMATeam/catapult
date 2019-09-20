@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/go-chi/chi/middleware"
@@ -87,6 +88,7 @@ func (hs *hostsService) AddHost(ctx context.Context, newHost *NewHost) (uuid.UUI
 		User:    newHost.User,
 		// TODO: encrypt the password
 		Password: newHost.Password,
+		Port:     newHost.Port,
 	}
 
 	id, err := hs.hostsRepository.AddHost(ctx, host)
@@ -107,12 +109,14 @@ func (hs *hostsService) InstallHost(ctx context.Context, h model.Host, localNode
 		FcVersion:       fcVersion,
 		AnsiblePassword: h.Password,
 		LocalNodePath:   localNodePath,
+		NodePort:        fmt.Sprintf("%d", h.Port),
 	}
 
 	ac := util.NewAnsibleCommand(util.SetupHostPlaybook,
 		h.User,
 		h.Address,
-		util.StructToMap(hi, strings.ToLower))
+		util.StructToMap(hi, strings.ToLower),
+		hs.log)
 
 	err := ac.ExecuteAnsible()
 	if err != nil {
@@ -155,6 +159,7 @@ type NewHost struct {
 	Password      string `json:"password"`
 	LocalNodePath string `json:"local_node_path"`
 	ShouldInstall bool   `json:"-"`
+	Port          int    `json:"port"`
 }
 
 type hostInstall struct {
@@ -162,6 +167,7 @@ type hostInstall struct {
 	AnsiblePassword string `json:"ansible_ssh_pass"`
 	FcVersion       string
 	LocalNodePath   string `json:"local_node_path"`
+	NodePort        string `json:"node_port"`
 }
 
 // TODO make it configurable

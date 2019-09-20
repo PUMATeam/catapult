@@ -44,13 +44,19 @@ func addHostEndpoint(svc services.Hosts) endpoint.Endpoint {
 		if err := svc.Validate(ctx, req); err != nil {
 			return nil, err
 		}
+
+		logger.WithContext(ctx).
+			WithFields(logrus.Fields{
+				"requestID": ctx.Value(middleware.RequestIDKey),
+				"request":   req,
+			}).Info("Request to add host")
 		id, err := svc.AddHost(ctx, &req)
-		logger.
-			WithContext(ctx).
+		logger.WithContext(ctx).
 			WithFields(logrus.Fields{
 				"requestID": ctx.Value(middleware.RequestIDKey),
 				"host":      req.Name,
 			}).Info("Added host")
+
 		if req.ShouldInstall {
 			h, err := svc.HostByID(ctx, id)
 			if err != nil {
@@ -64,6 +70,7 @@ func addHostEndpoint(svc services.Hosts) endpoint.Endpoint {
 				}).Info("Installing host")
 			go svc.InstallHost(ctx, *h, req.LocalNodePath)
 		}
+
 		return IDResponse{ID: id}, err
 	}
 }

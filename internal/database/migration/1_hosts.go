@@ -13,6 +13,7 @@ func init() {
 							(id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 							 name VARCHAR(50) UNIQUE, 
 							 address VARCHAR(16) UNIQUE,
+							 port INT4,
 							 status INT4,
 							 host_user VARCHAR(32),
 							 password TEXT)`)

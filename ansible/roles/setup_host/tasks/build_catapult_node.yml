@@ -58,7 +58,7 @@
     mode: u=rwx
 
 - name: start catapult-node
-  command: nohup ./start_catapult_node.sh &
+  command: nohup ./start_catapult_node.sh "{{ node_port }}" &
   async: 10
   poll: 0
   when: catapult_node_running.rc == 1

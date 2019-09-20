@@ -12,6 +12,7 @@ type Host struct {
 	Status   Status    `sql:"status,type:int4" json:"status"`
 	User     string    `sql:"host_user,type:varchar(32)" json:"user"`
 	Password string    `sql:"password,type:text" json:"password"`
+	Port     int       `sql:"port,type:int4,default:8001" json:"port"`
 }
 
 // VM represents the vms table
