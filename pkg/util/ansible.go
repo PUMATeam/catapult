@@ -2,6 +2,8 @@ package util
 
 import (
 	"fmt"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -15,15 +17,17 @@ type AnsibleCommand struct {
 	User        string
 	Host        string
 	cmd         []string
+	log         *log.Logger
 }
 
 // NewAnsibleCommand creates a new AnsibleCommand
-func NewAnsibleCommand(playbook, user, host string, params map[string]string) *AnsibleCommand {
+func NewAnsibleCommand(playbook, user, host string, params map[string]string, logger *log.Logger) *AnsibleCommand {
 	ac := &AnsibleCommand{
 		Playbook:    playbook,
 		ExtraParams: params,
 		User:        user,
 		Host:        host,
+		log:         logger,
 	}
 
 	ac.generateCmd()
@@ -43,6 +47,10 @@ func (ac *AnsibleCommand) generateCmd() {
 	for key, value := range ac.ExtraParams {
 		cmd = append(cmd, fmt.Sprintf("-e %s=%s", key, value))
 	}
+
+	ac.log.WithFields(log.Fields{
+		"command": cmd,
+	}).Info("Generated ansible command")
 
 	ac.cmd = cmd
 }

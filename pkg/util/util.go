@@ -40,6 +40,7 @@ func StructToMap(in interface{}, f func(s string) string) map[string]string {
 // ExecuteCmd executes a shell command
 func ExecuteCmd(cmdName string, args []string) error {
 	cmd := exec.Command(cmdName, args...)
+
 	cmdReader, err := cmd.StdoutPipe()
 	if err != nil {
 		return err

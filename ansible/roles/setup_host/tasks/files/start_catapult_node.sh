@@ -1,3 +1,4 @@
 #!/bin/bash -e
-./catapult-node serve &
+port=${1:-8001}
+./catapult-node serve -p $port &
 disown
