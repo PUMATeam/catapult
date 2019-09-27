@@ -2,11 +2,9 @@ package node
 
 import (
 	"context"
-	"fmt"
+	fmt "fmt"
 
 	"github.com/go-chi/chi/middleware"
-
-	"google.golang.org/grpc/connectivity"
 
 	log "github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -23,13 +21,16 @@ type NodeService interface {
 }
 
 type Node struct {
-	Host *model.Host
+	Host        *model.Host
+	connManager *Connections
 }
 
 // NewNodeService creates a Node instance
-func NewNodeService(host *model.Host) NodeService {
+// TODO add logger
+func NewNodeService(host *model.Host, connManager *Connections) NodeService {
 	return &Node{
-		Host: host,
+		Host:        host,
+		connManager: connManager,
 	}
 }
 
@@ -50,10 +51,25 @@ func (n *Node) StartVM(ctx context.Context, vm model.VM) (*VmConfig, error) {
 	// TODO: make port configurable
 	f := func(conn *grpc.ClientConn) (*Response, error) {
 		client := NewNodeClient(conn)
+		log.Info("Sending start vm request...")
 		return client.StartVM(ctx, vmConfig)
 	}
 
-	resp, err := runOnNode(n.Host, f)
+	conn := n.connManager.GetConnection(n.Host.ID)
+
+	// This can happen if the node manager was restarted
+	// manually, or there was an error
+	var err error
+	if conn == nil {
+		address := fmt.Sprintf("%s:%d", n.Host.Address, n.Host.Port)
+		conn, err = n.connManager.CreateConnection(n.Host.ID, address)
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	resp, err := runOnNode(conn, f)
 
 	log.WithContext(ctx).
 		WithFields(log.Fields{
@@ -79,7 +95,9 @@ func (n *Node) StopVM(ctx context.Context, vmID uuid.UUID) error {
 		client := NewNodeClient(conn)
 		return client.StopVM(ctx, uuid)
 	}
-	resp, err := runOnNode(n.Host, f)
+
+	conn := n.connManager.GetConnection(n.Host.ID)
+	resp, err := runOnNode(conn, f)
 
 	log.WithContext(ctx).
 		WithFields(log.Fields{
@@ -92,21 +110,7 @@ func (n *Node) StopVM(ctx context.Context, vmID uuid.UUID) error {
 
 type executeOnNode func(conn *grpc.ClientConn) (*Response, error)
 
-func runOnNode(host *model.Host, f executeOnNode) (*Response, error) {
-	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", host.Address, host.Port),
-		grpc.WithInsecure())
-	if err != nil {
-		return nil, err
-	}
-
-	defer conn.Close()
-
-	// Add a timeout and extract for reuse purposes
-	for {
-		if conn.GetState() == connectivity.Ready {
-			log.Info("Connection is ready")
-			resp, err := f(conn)
-			return resp, err
-		}
-	}
+func runOnNode(conn *grpc.ClientConn, f executeOnNode) (*Response, error) {
+	resp, err := f(conn)
+	return resp, err
 }

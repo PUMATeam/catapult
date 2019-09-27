@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"github.com/PUMATeam/catapult/pkg/node"
+
 	"github.com/PUMATeam/catapult/pkg/model"
 	uuid "github.com/satori/go.uuid"
 )
@@ -15,6 +17,8 @@ type Hosts interface {
 	AddHost(ctx context.Context, host *NewHost) (uuid.UUID, error)
 	UpdateHostStatus(ctx context.Context, host model.Host, status model.Status) error
 	InstallHost(ctx context.Context, h model.Host, localNodePath string)
+	GetConnManager(ctx context.Context) *node.Connections
+	InitializeHosts(ctx context.Context) []error
 }
 
 type VMs interface {
