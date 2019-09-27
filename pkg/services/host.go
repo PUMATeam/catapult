@@ -84,7 +84,7 @@ func (hs *hostsService) AddHost(ctx context.Context, newHost *NewHost) (uuid.UUI
 	host := model.Host{
 		Name:    newHost.Name,
 		Address: newHost.Address,
-		Status:  model.INSTALLING,
+		Status:  model.DOWN,
 		User:    newHost.User,
 		// TODO: encrypt the password
 		Password: newHost.Password,
@@ -111,6 +111,8 @@ func (hs *hostsService) InstallHost(ctx context.Context, h model.Host, localNode
 		LocalNodePath:   localNodePath,
 		NodePort:        fmt.Sprintf("%d", h.Port),
 	}
+
+	hs.UpdateHostStatus(ctx, h, model.INSTALLING)
 
 	ac := util.NewAnsibleCommand(util.SetupHostPlaybook,
 		h.User,
