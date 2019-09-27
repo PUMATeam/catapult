@@ -17,21 +17,21 @@ import (
 )
 
 // NewVMsService instantiates a new VM service
-func NewVMsService(vr repositories.VMs, hr repositories.Hosts, logger *log.Logger) VMs {
+func NewVMsService(vr repositories.VMs, hs Hosts, logger *log.Logger) VMs {
 	// TODO this looks weird and wrong
 	vs := &vmsService{
-		vmsRepository:   vr,
-		hostsRepository: hr,
-		log:             logger,
+		vmsRepository: vr,
+		hostsService:  hs,
+		log:           logger,
 	}
 
 	return vs
 }
 
 type vmsService struct {
-	vmsRepository   repositories.VMs
-	hostsRepository repositories.Hosts
-	log             *log.Logger
+	vmsRepository repositories.VMs
+	hostsService  Hosts
+	log           *log.Logger
 }
 
 func (v *vmsService) AddVM(ctx context.Context, vm NewVM) (uuid.UUID, error) {
@@ -63,7 +63,7 @@ func (v *vmsService) StartVM(ctx context.Context, vmID uuid.UUID) (*model.VM, er
 		return nil, fmt.Errorf("Could not find host in status up")
 	}
 
-	nodeService := node.NewNodeService(h)
+	nodeService := node.NewNodeService(h, v.hostsService.GetConnManager(ctx))
 
 	vm, err := v.VMByID(ctx, vmID)
 	if err != nil {
@@ -89,12 +89,12 @@ func (v *vmsService) ListVms(ctx context.Context) ([]model.VM, error) {
 }
 
 func (v *vmsService) StopVM(ctx context.Context, vm *model.VM) (uuid.UUID, error) {
-	h, err := v.hostsRepository.HostByID(ctx, vm.HostID)
+	h, err := v.hostsService.HostByID(ctx, vm.HostID)
 	if err != nil {
 		return uuid.Nil, fmt.Errorf("Host %s not found", vm.HostID)
 	}
 
-	nodeService := node.NewNodeService(h)
+	nodeService := node.NewNodeService(h, v.hostsService.GetConnManager(ctx))
 	err = nodeService.StopVM(ctx, vm.ID)
 	if err != nil {
 		return uuid.Nil, err
@@ -122,7 +122,7 @@ func (v *vmsService) VMByID(ctx context.Context, vmID uuid.UUID) (model.VM, erro
 }
 
 func (v *vmsService) findHostUP(ctx context.Context) *model.Host {
-	hosts, err := v.hostsRepository.ListHosts(context.TODO())
+	hosts, err := v.hostsService.ListHosts(ctx)
 	v.log.WithContext(ctx).
 		WithFields(log.Fields{
 			"requestID": ctx.Value(middleware.RequestIDKey),
