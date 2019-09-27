@@ -9,6 +9,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
+	node "github.com/PUMATeam/catapult/pkg/node"
 	"github.com/PUMATeam/catapult/pkg/util"
 
 	"github.com/PUMATeam/catapult/pkg/model"
@@ -16,16 +17,49 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-func NewHostsService(hr repositories.Hosts, logger *log.Logger) Hosts {
+func NewHostsService(hr repositories.Hosts, logger *log.Logger, connManager *node.Connections) Hosts {
 	return &hostsService{
 		hostsRepository: hr,
 		log:             logger,
+		connManager:     connManager,
 	}
 }
 
 type hostsService struct {
 	hostsRepository repositories.Hosts
 	log             *log.Logger
+	connManager     *node.Connections
+}
+
+// InitalizeHosts initializes running hosts when the app starts.
+// Currently only creats grpc connection, soon will run health checks
+func (hs *hostsService) InitializeHosts(ctx context.Context) []error {
+	errors := make([]error, 0, 0)
+	hosts, err := hs.hostsRepository.ListHosts(ctx)
+
+	if err != nil {
+		errors = append(errors, fmt.Errorf("Couldn't fetch hosts from DB"))
+		return errors
+	}
+
+	for _, host := range hosts {
+		address := fmt.Sprintf("%s:%d", host.Address, host.Port)
+		if host.Status == model.UP {
+			hs.log.WithContext(ctx).
+				WithFields(log.Fields{
+					"requestID": ctx.Value(middleware.RequestIDKey),
+					"host":      host.Name,
+					"address":   address,
+				}).
+				Info("Initializing host connection")
+			_, err := hs.connManager.CreateConnection(host.ID, address)
+			if err != nil {
+				errors = append(errors, err)
+			}
+		}
+	}
+
+	return errors
 }
 
 func (hs *hostsService) HostByID(ctx context.Context, id uuid.UUID) (*model.Host, error) {
@@ -130,7 +164,25 @@ func (hs *hostsService) InstallHost(ctx context.Context, h model.Host, localNode
 		hs.UpdateHostStatus(ctx, h, model.FAILED)
 		return
 	}
+	address := fmt.Sprintf("%s:%d", h.Address, h.Port)
+	hs.log.WithContext(ctx).
+		WithFields(log.Fields{
+			"requestID": ctx.Value(middleware.RequestIDKey),
+			"host":      h.Name,
+			"address":   address,
+		}).Info("Create grpc connection for host")
 
+	_, err = hs.connManager.CreateConnection(h.ID, address)
+	if err != nil {
+		hs.log.WithContext(ctx).
+			WithFields(log.Fields{
+				"requestID": ctx.Value(middleware.RequestIDKey),
+				"host":      h.Name,
+			}).Error("Failed to create grpc connections, will be retried upon sending a request")
+
+	}
+
+	// TODO send a health check to the host before
 	hs.UpdateHostStatus(ctx, h, model.UP)
 }
 
@@ -152,6 +204,10 @@ func (hs *hostsService) UpdateHostStatus(ctx context.Context, host model.Host, s
 	}
 
 	return nil
+}
+
+func (hs *hostsService) GetConnManager(ctx context.Context) *node.Connections {
+	return hs.connManager
 }
 
 type NewHost struct {

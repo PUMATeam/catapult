@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"syscall"
 
+	"github.com/PUMATeam/catapult/pkg/node"
+
 	log "github.com/sirupsen/logrus"
 
 	"github.com/go-chi/chi/middleware"
@@ -45,10 +47,17 @@ func Bootstrap(p int) http.Handler {
 	}
 
 	hr := repositories.NewHostsRepository(db)
-	hs := services.NewHostsService(hr, logger)
+
+	connManager := node.NewNodeConnectionManager()
+	hs := services.NewHostsService(hr, logger, connManager)
+
+	errors := hs.InitializeHosts(context.Background())
+	if len(errors) > 0 {
+		log.Error(errors)
+	}
 
 	vr := repositories.NewVMsRepository(db)
-	vs := services.NewVMsService(vr, hr, logger)
+	vs := services.NewVMsService(vr, hs, logger)
 
 	return New(hs, vs)
 }
