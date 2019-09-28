@@ -47,9 +47,8 @@ func (hs *hostsService) InitializeHosts(ctx context.Context) []error {
 		if host.Status == model.UP {
 			hs.log.WithContext(ctx).
 				WithFields(log.Fields{
-					"requestID": ctx.Value(middleware.RequestIDKey),
-					"host":      host.Name,
-					"address":   address,
+					"host":    host.Name,
+					"address": address,
 				}).
 				Info("Initializing host connection")
 			_, err := hs.connManager.CreateConnection(host.ID, address)
