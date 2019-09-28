@@ -43,7 +43,7 @@ func Bootstrap(p int) http.Handler {
 
 	db, err := database.Connect()
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
 	hr := repositories.NewHostsRepository(db)
@@ -53,7 +53,7 @@ func Bootstrap(p int) http.Handler {
 
 	errors := hs.InitializeHosts(context.Background())
 	if len(errors) > 0 {
-		log.Error(errors)
+		logger.Error(errors)
 	}
 
 	vr := repositories.NewVMsRepository(db)
