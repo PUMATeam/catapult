@@ -62,3 +62,12 @@ $ ip link set fc-tap-$UUID up
   - Combine both options above - but adding a vms from /var/vms to the db
 might be challenging as it would require learning about the VM specifications
 from the API (there's no "virsh dumpxml") as far as I know
+
+# Handling host state
+- Upon starting we should check all the present hosts state
+  - If a host is UP, we need to try and health check it using grpc
+    - if it failes to respond it might mean the node process is down (should we turn it into a systemd service?), move it into DOWN state
+  - We should not accept any request until we determined the host states
+
+- We should be able to de/activate a host - an ansible script to start/stop
+  the catapult-node process
