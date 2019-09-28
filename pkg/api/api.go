@@ -26,7 +26,7 @@ import (
 var port int
 var logger *log.Logger
 
-func New(hs services.Hosts,
+func newAPI(hs services.Hosts,
 	vs services.VMs) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
@@ -37,10 +37,7 @@ func New(hs services.Hosts,
 	return r
 }
 
-func Bootstrap(p int) http.Handler {
-	port = p
-	logger = InitLog()
-
+func bootstrap(logger *log.Logger) http.Handler {
 	db, err := database.Connect()
 	if err != nil {
 		logger.Fatal(err)
@@ -59,19 +56,21 @@ func Bootstrap(p int) http.Handler {
 	vr := repositories.NewVMsRepository(db)
 	vs := services.NewVMsService(vr, hs, logger)
 
-	return New(hs, vs)
+	return newAPI(hs, vs)
 }
 
 // Start start the server and listens on the provided port
-func Start(h http.Handler) {
+func Start(port int) {
+	logger = InitLog()
+	handler := bootstrap(logger)
 	server := http.Server{
-		Handler: h,
+		Handler: handler,
 		Addr:    ":" + strconv.Itoa(port),
 	}
 
 	installSignal()
 
-	logger.Infof("Starting server, listening on: %v", server.Addr)
+	logger.Infof("Starting server, listening on: %s", server.Addr)
 	err := server.ListenAndServe()
 	if err != nil {
 		logger.Error(err)
