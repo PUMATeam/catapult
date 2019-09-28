@@ -25,6 +25,7 @@ import (
 
 var port int
 var logger *log.Logger
+var connManager = node.NewNodeConnectionManager()
 
 func newAPI(hs services.Hosts,
 	vs services.VMs) http.Handler {
@@ -45,7 +46,6 @@ func bootstrap(logger *log.Logger) http.Handler {
 
 	hr := repositories.NewHostsRepository(db)
 
-	connManager := node.NewNodeConnectionManager()
 	hs := services.NewHostsService(hr, logger, connManager)
 
 	errors := hs.InitializeHosts(context.Background())
@@ -79,10 +79,15 @@ func Start(port int) {
 
 func installSignal() {
 	var gracefulStop = make(chan os.Signal)
-	signal.Notify(gracefulStop, syscall.SIGTERM)
-	signal.Notify(gracefulStop, syscall.SIGINT)
+	signal.Notify(gracefulStop, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		<-gracefulStop
+		log.Info("Shutting down grpc connections...")
+		errors := connManager.Shutdown()
+		if len(errors) > 0 {
+			log.Warn(errors)
+		}
+
 		log.Info("Exiting... ")
 		os.Exit(0)
 	}()
