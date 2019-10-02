@@ -1,7 +1,7 @@
 # Catapult
 Catapult aims to provide a somewhat full-featured management system to manage firecracker VMs.
 
-# Prerequisits
+# Prerequisites
 You need to have postgresql installed.
 
 Create a user
@@ -16,7 +16,7 @@ encoding 'UTF8' lc_collate 'en_US.UTF-8' lc_ctype 'en_US.UTF-8';
 
 ```
 
-Install pgcrypto extenstion
+Install pgcrypto extention
 ```
   CREATE EXTENSION 'pgcrypto'
 ```
