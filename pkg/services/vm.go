@@ -62,9 +62,10 @@ func (v *vmsService) StartVM(ctx context.Context, vmID uuid.UUID) (*model.VM, er
 	if h == nil {
 		return nil, fmt.Errorf("Could not find host in status up")
 	}
+	h.Lock()
+	defer h.Unlock()
 
 	nodeService := node.NewNodeService(h, v.hostsService.GetConnManager(ctx))
-
 	vm, err := v.VMByID(ctx, vmID)
 	if err != nil {
 		log.Error(err)
