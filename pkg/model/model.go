@@ -1,6 +1,8 @@
 package model
 
 import (
+	"sync"
+
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -13,6 +15,7 @@ type Host struct {
 	User     string    `sql:"host_user,type:varchar(32)" json:"user"`
 	Password string    `sql:"password,type:text" json:"password"`
 	Port     int       `sql:"port,type:int4,default:8001" json:"port"`
+	sync.Mutex
 }
 
 // VM represents the vms table
@@ -30,10 +33,12 @@ type VM struct {
 
 type Status int
 
+// TODO split up to VM statuses and host statuses
 const (
 	UNKNOWN Status = iota
 	DOWN
 	UP
 	INSTALLING
+	INITIALIZING
 	FAILED
 )
