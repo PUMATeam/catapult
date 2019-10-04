@@ -28,6 +28,8 @@ Currently I have to use ubuntu, trying to use Centos proved unlucky, might try w
 ```
 $ truncate -s 1G rootfs
 
+$ mkfs.ext4 rootfs
+
 $ sudo mount rootfs /mnt/rootfs
 
 $ debootstrap --include openssh-server,vim bionic /mnt/rootfs http://archive.ubuntu.com/ubuntu/
