@@ -23,7 +23,6 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-var port int
 var logger *log.Logger
 var connManager = node.NewNodeConnectionManager()
 
