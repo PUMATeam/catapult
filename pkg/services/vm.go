@@ -95,7 +95,7 @@ func (v *vmsService) StopVM(ctx context.Context, vm *model.VM) (uuid.UUID, error
 		return uuid.Nil, fmt.Errorf("Host %s not found", vm.HostID)
 	}
 
-	nodeService := node.NewNodeService(h, v.hostsService.GetConnManager(ctx))
+	nodeService := node.NewNodeService(&h, v.hostsService.GetConnManager(ctx))
 	err = nodeService.StopVM(ctx, vm.ID)
 	if err != nil {
 		return uuid.Nil, err
@@ -134,7 +134,7 @@ func (v *vmsService) findHostUP(ctx context.Context) *model.Host {
 
 	for _, h := range hosts {
 		if h.Status == model.UP {
-			return h
+			return &h
 		}
 	}
 

@@ -50,7 +50,7 @@ func (hs *hostsService) InitializeHosts(ctx context.Context) []error {
 		if host.Status == model.UP {
 			host.Lock()
 			// Set host status to INITIALIZING during intialization
-			hs.UpdateHostStatus(ctx, host, model.INITIALIZING)
+			hs.UpdateHostStatus(ctx, &host, model.INITIALIZING)
 			hs.log.WithContext(ctx).
 				WithFields(log.Fields{
 					"host":    host.Name,
@@ -77,7 +77,7 @@ func (hs *hostsService) InitializeHosts(ctx context.Context) []error {
 				}
 
 				h.Unlock()
-			}(host)
+			}(&host)
 		}
 	}
 
@@ -86,11 +86,11 @@ func (hs *hostsService) InitializeHosts(ctx context.Context) []error {
 	return errors
 }
 
-func (hs *hostsService) HostByID(ctx context.Context, id uuid.UUID) (*model.Host, error) {
+func (hs *hostsService) HostByID(ctx context.Context, id uuid.UUID) (model.Host, error) {
 	return hs.hostsRepository.HostByID(ctx, id)
 }
 
-func (hs *hostsService) ListHosts(ctx context.Context) ([]*model.Host, error) {
+func (hs *hostsService) ListHosts(ctx context.Context) ([]model.Host, error) {
 	return hs.hostsRepository.ListHosts(ctx)
 }
 
