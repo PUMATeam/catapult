@@ -31,7 +31,7 @@ func NewNodeConnectionManager() *Connections {
 // nodeID -> conn
 func (n *Connections) CreateConnection(nodeID uuid.UUID, address string) (*grpc.ClientConn, error) {
 	conn, err := grpc.Dial(address, grpc.WithInsecure(),
-		grpc.WithTimeout(time.Duration(5)*time.Second),
+		grpc.WithTimeout(time.Duration(10)*time.Second),
 		grpc.WithBlock())
 	if err != nil {
 		return nil, err
