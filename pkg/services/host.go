@@ -54,13 +54,25 @@ func (hs *hostsService) InitializeHosts(ctx context.Context) []error {
 					"address": address,
 				}).
 				Info("Initializing host connection")
-			_, err := hs.connManager.CreateConnection(host.ID, address)
+			_, err := go func() {
+				 hs.connManager.CreateConnection(host.ID, address)
+			}()
+
 			host.Unlock()
-			if err != nil {
+			if err == nil {
+				hs.UpdateHostStatus(ctx, host, model.UP)
+			} else {
+				hs.log.WithContext(ctx).
+					WithFields(log.Fields{
+						"host":    host.Name,
+						"address": address,
+					}).
+					Error("Failed to initialize host connection")
+
 				errors = append(errors, err)
+				hs.UpdateHostStatus(ctx, host, model.DOWN)
 			}
 
-			hs.UpdateHostStatus(ctx, host, model.UP)
 		}
 	}
 
