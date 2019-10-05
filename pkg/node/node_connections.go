@@ -1,7 +1,9 @@
 package node
 
 import (
+	"fmt"
 	"sync"
+	"time"
 
 	"google.golang.org/grpc/connectivity"
 
@@ -28,17 +30,18 @@ func NewNodeConnectionManager() *Connections {
 // and stores it in the nodeToConn map with a mapping of
 // nodeID -> conn
 func (n *Connections) CreateConnection(nodeID uuid.UUID, address string) (*grpc.ClientConn, error) {
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
+	conn, err := grpc.Dial(address, grpc.WithInsecure(),
+		grpc.WithTimeout(time.Duration(5)*time.Second),
+		grpc.WithBlock())
 	if err != nil {
 		return nil, err
 	}
 
-	for {
-		if conn.GetState() == connectivity.Ready {
-			n.nodeToConn.Store(nodeID, conn)
-			break
-		}
+	if conn.GetState() != connectivity.Ready {
+		return nil, fmt.Errorf("Could not connect to node in allocated time")
 	}
+
+	n.nodeToConn.Store(nodeID, conn)
 
 	return conn, nil
 }

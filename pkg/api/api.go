@@ -48,10 +48,13 @@ func bootstrap(logger *log.Logger) http.Handler {
 
 	hs := services.NewHostsService(hr, logger, connManager)
 
-	errors := hs.InitializeHosts(context.Background())
-	if len(errors) > 0 {
-		logger.Error(errors)
-	}
+	go func() {
+		errors := hs.InitializeHosts(context.Background())
+		if len(errors) > 0 {
+			logger.Error(errors)
+		}
+
+	}()
 
 	vr := repositories.NewVMsRepository(db)
 	vs := services.NewVMsService(vr, hs, logger)
