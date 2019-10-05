@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/go-chi/chi/middleware"
 
@@ -42,6 +43,8 @@ func (hs *hostsService) InitializeHosts(ctx context.Context) []error {
 		return errors
 	}
 
+	var wg sync.WaitGroup
+
 	for _, host := range hosts {
 		address := fmt.Sprintf("%s:%d", host.Address, host.Port)
 		if host.Status == model.UP {
@@ -53,28 +56,32 @@ func (hs *hostsService) InitializeHosts(ctx context.Context) []error {
 					"host":    host.Name,
 					"address": address,
 				}).
-				Info("Initializing host connection")	
-			_, err := go func() {
-				 hs.connManager.CreateConnection(host.ID, address)
-			}()
+				Info("Initializing host connection")
+			go func(h *model.Host) {
+				defer wg.Done()
+				wg.Add(1)
+				_, err := hs.connManager.CreateConnection(h.ID, address)
 
-			host.Unlock()
-			if err == nil {
-				hs.UpdateHostStatus(ctx, host, model.UP)
-			} else {
-				hs.log.WithContext(ctx).
-					WithFields(log.Fields{
-						"host":    host.Name,
-						"address": address,
-					}).
-					Error("Failed to initialize host connection")
+				if err == nil {
+					hs.UpdateHostStatus(ctx, h, model.UP)
+				} else {
+					hs.log.WithContext(ctx).
+						WithFields(log.Fields{
+							"host":    h.Name,
+							"address": address,
+						}).
+						Error("Failed to initialize host connection")
 
-				errors = append(errors, err)
-				hs.UpdateHostStatus(ctx, host, model.DOWN)
-			}
+					errors = append(errors, err)
+					hs.UpdateHostStatus(ctx, h, model.DOWN)
+				}
 
+				h.Unlock()
+			}(host)
 		}
 	}
+
+	wg.Wait()
 
 	return errors
 }
@@ -83,11 +90,11 @@ func (hs *hostsService) HostByID(ctx context.Context, id uuid.UUID) (*model.Host
 	return hs.hostsRepository.HostByID(ctx, id)
 }
 
-func (hs *hostsService) ListHosts(ctx context.Context) ([]model.Host, error) {
+func (hs *hostsService) ListHosts(ctx context.Context) ([]*model.Host, error) {
 	return hs.hostsRepository.ListHosts(ctx)
 }
 
-func (hs *hostsService) updateHostStatus(ctx context.Context, host model.Host, status model.Status) error {
+func (hs *hostsService) updateHostStatus(ctx context.Context, host *model.Host, status model.Status) error {
 	host.Status = status
 	return hs.hostsRepository.UpdateHost(ctx, host)
 }
@@ -142,7 +149,7 @@ func (hs *hostsService) AddHost(ctx context.Context, newHost *NewHost) (uuid.UUI
 		Port:     newHost.Port,
 	}
 
-	id, err := hs.hostsRepository.AddHost(ctx, host)
+	id, err := hs.hostsRepository.AddHost(ctx, &host)
 	if err != nil {
 		return uuid.Nil, err
 	}
@@ -154,7 +161,7 @@ func (hs *hostsService) AddHost(ctx context.Context, newHost *NewHost) (uuid.UUI
 // InstallHost installs prerequisits on the host
 // TODO: leaving it as public to allow a user add a host
 // without installing right away
-func (hs *hostsService) InstallHost(ctx context.Context, h model.Host, localNodePath string) {
+func (hs *hostsService) InstallHost(ctx context.Context, h *model.Host, localNodePath string) {
 	hi := hostInstall{
 		User:            h.User,
 		FcVersion:       fcVersion,
@@ -203,7 +210,7 @@ func (hs *hostsService) InstallHost(ctx context.Context, h model.Host, localNode
 	hs.UpdateHostStatus(ctx, h, model.UP)
 }
 
-func (hs *hostsService) UpdateHostStatus(ctx context.Context, host model.Host, status model.Status) error {
+func (hs *hostsService) UpdateHostStatus(ctx context.Context, host *model.Host, status model.Status) error {
 	hs.log.WithContext(ctx).
 		WithFields(log.Fields{
 			"requestID": ctx.Value(middleware.RequestIDKey),

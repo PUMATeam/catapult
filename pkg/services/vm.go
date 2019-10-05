@@ -134,7 +134,7 @@ func (v *vmsService) findHostUP(ctx context.Context) *model.Host {
 
 	for _, h := range hosts {
 		if h.Status == model.UP {
-			return &h
+			return h
 		}
 	}
 

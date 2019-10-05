@@ -13,10 +13,10 @@ import (
 type Hosts interface {
 	Validate(ctx context.Context, host NewHost) error
 	HostByID(ctx context.Context, id uuid.UUID) (*model.Host, error)
-	ListHosts(ctx context.Context) ([]model.Host, error)
+	ListHosts(ctx context.Context) ([]*model.Host, error)
 	AddHost(ctx context.Context, host *NewHost) (uuid.UUID, error)
-	UpdateHostStatus(ctx context.Context, host model.Host, status model.Status) error
-	InstallHost(ctx context.Context, h model.Host, localNodePath string)
+	UpdateHostStatus(ctx context.Context, host *model.Host, status model.Status) error
+	InstallHost(ctx context.Context, h *model.Host, localNodePath string)
 	GetConnManager(ctx context.Context) *node.Connections
 	InitializeHosts(ctx context.Context) []error
 }
