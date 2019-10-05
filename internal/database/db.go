@@ -34,6 +34,11 @@ func Connect() (*pg.DB, error) {
 	}
 
 	db := pg.Connect(opts)
+
+	var n int // github.com/go-pg/pg v8.0.5 seems not to have function similar to Ping(), so have to use this
+	if _, err := db.QueryOne(pg.Scan(&n), "SELECT 1"); err != nil {
+		return nil, err
+	}
 	db.AddQueryHook(dbLogger{})
 
 	return db, nil
