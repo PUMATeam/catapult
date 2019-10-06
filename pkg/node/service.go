@@ -62,7 +62,7 @@ func (n *Node) StartVM(ctx context.Context, vm model.VM) (*VmConfig, error) {
 	var err error
 	if conn == nil {
 		address := fmt.Sprintf("%s:%d", n.Host.Address, n.Host.Port)
-		conn, err = n.connManager.CreateConnection(n.Host.ID, address)
+		conn, err = n.connManager.CreateConnection(ctx, n.Host.ID, address)
 
 		if err != nil {
 			return nil, err

@@ -1,6 +1,7 @@
 package node
 
 import (
+	context "context"
 	"fmt"
 	"sync"
 	"time"
@@ -29,10 +30,12 @@ func NewNodeConnectionManager() *Connections {
 // CreateConnection creates a connection to a grpc endpoint
 // and stores it in the nodeToConn map with a mapping of
 // nodeID -> conn
-func (n *Connections) CreateConnection(nodeID uuid.UUID, address string) (*grpc.ClientConn, error) {
-	conn, err := grpc.Dial(address, grpc.WithInsecure(),
-		grpc.WithTimeout(time.Duration(10)*time.Second),
-		grpc.WithBlock())
+func (n *Connections) CreateConnection(ctx context.Context, nodeID uuid.UUID, address string) (*grpc.ClientConn, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Duration(10)*time.Second)
+	defer cancel()
+	conn, err := grpc.DialContext(ctx,
+		address,
+		grpc.WithBlock(), grpc.WithInsecure())
 	if err != nil {
 		return nil, err
 	}
