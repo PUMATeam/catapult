@@ -48,7 +48,6 @@ func (hs *hostsService) InitializeHosts(ctx context.Context) []error {
 	for _, host := range hosts {
 		address := fmt.Sprintf("%s:%d", host.Address, host.Port)
 		if host.Status == model.UP {
-			host.Lock()
 			// Set host status to INITIALIZING during intialization
 			hs.UpdateHostStatus(ctx, &host, model.INITIALIZING)
 			hs.log.WithContext(ctx).
@@ -75,8 +74,6 @@ func (hs *hostsService) InitializeHosts(ctx context.Context) []error {
 					errors = append(errors, err)
 					hs.UpdateHostStatus(ctx, h, model.DOWN)
 				}
-
-				h.Unlock()
 			}(&host)
 		}
 	}
