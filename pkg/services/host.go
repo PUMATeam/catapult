@@ -39,7 +39,7 @@ func (hs *hostsService) InitializeHosts(ctx context.Context) []error {
 	hosts, err := hs.hostsRepository.ListHosts(ctx)
 
 	if err != nil {
-		errors = append(errors, fmt.Errorf("Couldn't fetch hosts from DB"))
+		errors = append(errors, err)
 		return errors
 	}
 
@@ -50,12 +50,6 @@ func (hs *hostsService) InitializeHosts(ctx context.Context) []error {
 		if host.Status == model.UP {
 			// Set host status to INITIALIZING during intialization
 			hs.UpdateHostStatus(ctx, &host, model.INITIALIZING)
-			hs.log.WithContext(ctx).
-				WithFields(log.Fields{
-					"host":    host.Name,
-					"address": address,
-				}).
-				Info("Initializing host connection")
 			go func(h *model.Host) {
 				defer wg.Done()
 				wg.Add(1)
