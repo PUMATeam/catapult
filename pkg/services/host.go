@@ -59,7 +59,7 @@ func (hs *hostsService) InitializeHosts(ctx context.Context) []error {
 			go func(h *model.Host) {
 				defer wg.Done()
 				wg.Add(1)
-				_, err := hs.connManager.CreateConnection(h.ID, address)
+				_, err := hs.connManager.CreateConnection(ctx, h.ID, address)
 
 				if err == nil {
 					hs.UpdateHostStatus(ctx, h, model.UP)
@@ -193,7 +193,7 @@ func (hs *hostsService) InstallHost(ctx context.Context, h *model.Host, localNod
 			"address":   address,
 		}).Info("Create grpc connection for host")
 
-	_, err = hs.connManager.CreateConnection(h.ID, address)
+	_, err = hs.connManager.CreateConnection(ctx, h.ID, address)
 	if err != nil {
 		hs.log.WithContext(ctx).
 			WithFields(log.Fields{
