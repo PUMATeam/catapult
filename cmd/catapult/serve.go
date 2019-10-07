@@ -8,8 +8,8 @@ import (
 var port int
 
 // restCmd represents the rest command
-var serverCmd = &cobra.Command{
-	Use:   "server",
+var serveCmd = &cobra.Command{
+	Use:   "serve",
 	Short: "Start catapult server",
 	Long:  `Start catapult server`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -18,7 +18,7 @@ var serverCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(serverCmd)
+	rootCmd.AddCommand(serveCmd)
 
-	serverCmd.Flags().IntVarP(&port, "port", "p", 8888, "Port for which to listen")
+	serveCmd.Flags().IntVarP(&port, "port", "p", 8888, "Port for which to listen")
 }
