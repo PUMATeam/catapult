@@ -7,6 +7,8 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/PUMATeam/catapult/pkg/node"
+
 	logrus "github.com/sirupsen/logrus"
 
 	"github.com/PUMATeam/catapult/internal/database"
@@ -70,7 +72,9 @@ func TestHostService(t *testing.T) {
 }
 
 func testAddHost(t *testing.T) {
-	svc := NewHostsService(repository, log)
+	connManager := node.Connections{}
+
+	svc := NewHostsService(repository, log, &connManager)
 	newHost := &NewHost{
 		Name:     "test_host",
 		Address:  "192.168.122.45",
