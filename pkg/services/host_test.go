@@ -16,21 +16,21 @@ import (
 )
 
 var repository repositories.Hosts
-var logger *logrus.Logger
+var log *logrus.Logger
 
 func initLog() *logrus.Logger {
 	// TODO make configurable
-	logger := logrus.New()
-	logger.SetOutput(os.Stdout)
-	logger.SetLevel(logrus.DebugLevel)
-	logger.Formatter = &logrus.TextFormatter{
+	log := logrus.New()
+	log.SetOutput(os.Stdout)
+	log.SetLevel(logrus.DebugLevel)
+	log.Formatter = &logrus.TextFormatter{
 		FullTimestamp: true,
 	}
-	return logger
+	return log
 }
 
 func setupTest(t *testing.T) {
-	logger = initLog()
+	log = initLog()
 
 	_, filename, _, _ := runtime.Caller(0)
 	dir := path.Join(path.Dir(filename), "../..")
@@ -70,7 +70,7 @@ func TestHostService(t *testing.T) {
 }
 
 func testAddHost(t *testing.T) {
-	svc := NewHostsService(repository, logger)
+	svc := NewHostsService(repository, log)
 	newHost := &NewHost{
 		Name:     "test_host",
 		Address:  "192.168.122.45",

@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"syscall"
 
-	"github.com/PUMATeam/catapult/pkg/node"
+	logrus "github.com/sirupsen/logrus"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/PUMATeam/catapult/pkg/node"
 
 	"github.com/go-chi/chi/middleware"
 
@@ -23,7 +23,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-var logger *log.Logger
+var log *logrus.Logger
 var connManager = node.NewNodeConnectionManager()
 
 func newAPI(hs services.Hosts,
@@ -37,34 +37,34 @@ func newAPI(hs services.Hosts,
 	return r
 }
 
-func bootstrap(logger *log.Logger) http.Handler {
+func bootstrap(log *logrus.Logger) http.Handler {
 	db, err := database.Connect()
 	if err != nil {
-		logger.Fatal(err)
+		log.Fatal(err)
 	}
 
 	hr := repositories.NewHostsRepository(db)
 
-	hs := services.NewHostsService(hr, logger, connManager)
+	hs := services.NewHostsService(hr, log, connManager)
 
 	go func() {
 		errors := hs.InitializeHosts(context.Background())
 		if len(errors) > 0 {
-			logger.Error(errors)
+			log.Error(errors)
 		}
 
 	}()
 
 	vr := repositories.NewVMsRepository(db)
-	vs := services.NewVMsService(vr, hs, logger)
+	vs := services.NewVMsService(vr, hs, log)
 
 	return newAPI(hs, vs)
 }
 
 // Start start the server and listens on the provided port
 func Start(port int) {
-	logger = InitLog()
-	handler := bootstrap(logger)
+	log = InitLog()
+	handler := bootstrap(log)
 	server := http.Server{
 		Handler: handler,
 		Addr:    ":" + strconv.Itoa(port),
@@ -72,10 +72,10 @@ func Start(port int) {
 
 	installSignal()
 
-	logger.Infof("Starting server, listening on: %s", server.Addr)
+	log.Infof("Starting server, listening on: %s", server.Addr)
 	err := server.ListenAndServe()
 	if err != nil {
-		logger.Error(err)
+		log.Error(err)
 	}
 }
 
