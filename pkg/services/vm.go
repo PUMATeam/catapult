@@ -17,12 +17,12 @@ import (
 )
 
 // NewVMsService instantiates a new VM service
-func NewVMsService(vr repositories.VMs, hs Hosts, logger *log.Logger) VMs {
+func NewVMsService(vr repositories.VMs, hs Hosts, log *log.Logger) VMs {
 	// TODO this looks weird and wrong
 	vs := &vmsService{
 		vmsRepository: vr,
 		hostsService:  hs,
-		log:           logger,
+		log:           log,
 	}
 
 	return vs
