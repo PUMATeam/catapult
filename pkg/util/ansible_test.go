@@ -7,6 +7,8 @@ import (
 )
 
 func TestNewAnsibleCommand(t *testing.T) {
+	log := InitLog()
+
 	ac := NewAnsibleCommand(SetupHostPlaybook,
 		"root",
 		"192.168.50.50",
@@ -14,6 +16,7 @@ func TestNewAnsibleCommand(t *testing.T) {
 			"ansible_ssh_pass": "centos",
 			"fc_version":       "0.15.0",
 		},
+		log,
 	)
 
 	got := strings.Join(ac.cmd, " ")

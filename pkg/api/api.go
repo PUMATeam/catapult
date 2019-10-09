@@ -12,6 +12,7 @@ import (
 	logrus "github.com/sirupsen/logrus"
 
 	"github.com/PUMATeam/catapult/pkg/node"
+	"github.com/PUMATeam/catapult/pkg/util"
 
 	"github.com/go-chi/chi/middleware"
 
@@ -63,7 +64,7 @@ func bootstrap(log *logrus.Logger) http.Handler {
 
 // Start start the server and listens on the provided port
 func Start(port int) {
-	log = InitLog()
+	log = util.InitLog()
 	handler := bootstrap(log)
 	server := http.Server{
 		Handler: handler,
