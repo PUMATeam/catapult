@@ -2,9 +2,14 @@ package util
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os/exec"
 	"reflect"
+
+	"github.com/go-chi/chi/middleware"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // StructToMap converts a struct to a map
@@ -61,4 +66,17 @@ func ExecuteCmd(cmdName string, args []string) error {
 	}
 
 	return err
+}
+
+func Log(ctx context.Context, logger *log.Logger) *log.Entry {
+	entry := log.NewEntry(logger)
+	if ctx != nil {
+		entry = logger.WithContext(ctx)
+		requestID := ctx.Value(middleware.RequestIDKey)
+		if requestID != nil {
+			entry = entry.WithField("requestID", requestID)
+		}
+	}
+
+	return entry
 }
