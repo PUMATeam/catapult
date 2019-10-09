@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	"github.com/PUMATeam/catapult/pkg/node"
+	"github.com/PUMATeam/catapult/pkg/util"
 
-	"github.com/go-chi/chi/middleware"
-
-	log "github.com/sirupsen/logrus"
+	logger "github.com/sirupsen/logrus"
+	logrus "github.com/sirupsen/logrus"
 
 	"github.com/PUMATeam/catapult/pkg/model"
 
@@ -17,12 +17,12 @@ import (
 )
 
 // NewVMsService instantiates a new VM service
-func NewVMsService(vr repositories.VMs, hs Hosts, log *log.Logger) VMs {
+func NewVMsService(vr repositories.VMs, hs Hosts, logger *logger.Logger) VMs {
 	// TODO this looks weird and wrong
 	vs := &vmsService{
 		vmsRepository: vr,
 		hostsService:  hs,
-		log:           log,
+		logger:        logger,
 	}
 
 	return vs
@@ -31,7 +31,7 @@ func NewVMsService(vr repositories.VMs, hs Hosts, log *log.Logger) VMs {
 type vmsService struct {
 	vmsRepository repositories.VMs
 	hostsService  Hosts
-	log           *log.Logger
+	logger        *logger.Logger
 }
 
 func (v *vmsService) AddVM(ctx context.Context, vm NewVM) (uuid.UUID, error) {
@@ -47,11 +47,7 @@ func (v *vmsService) AddVM(ctx context.Context, vm NewVM) (uuid.UUID, error) {
 		RootFileSystem: vm.RootFileSystem,
 	}
 
-	v.log.WithContext(ctx).
-		WithFields(log.Fields{
-			"requestID": ctx.Value(middleware.RequestIDKey),
-			"VM":        vmToAdd.Name,
-		}).Info("adding VM")
+	v.log(ctx, vmToAdd.Name).Info("adding VM")
 	return v.vmsRepository.AddVM(ctx, vmToAdd)
 }
 
@@ -66,7 +62,7 @@ func (v *vmsService) StartVM(ctx context.Context, vmID uuid.UUID) (*model.VM, er
 	nodeService := node.NewNodeService(h, v.hostsService.GetConnManager(ctx))
 	vm, err := v.VMByID(ctx, vmID)
 	if err != nil {
-		log.Error(err)
+		v.log(ctx, "").Error(err)
 		return nil, err
 	}
 
@@ -122,12 +118,9 @@ func (v *vmsService) VMByID(ctx context.Context, vmID uuid.UUID) (model.VM, erro
 
 func (v *vmsService) findHostUP(ctx context.Context) *model.Host {
 	hosts, err := v.hostsService.ListHosts(ctx)
-	v.log.WithContext(ctx).
-		WithFields(log.Fields{
-			"requestID": ctx.Value(middleware.RequestIDKey),
-		}).Info("hosts found: ", hosts)
+	v.log(ctx, "").Info("hosts found: ", hosts)
 	if err != nil {
-		log.Error(err)
+		v.log(ctx, "").Error(err)
 	}
 
 	for _, h := range hosts {
@@ -137,6 +130,14 @@ func (v *vmsService) findHostUP(ctx context.Context) *model.Host {
 	}
 
 	return nil
+}
+
+func (v *vmsService) log(ctx context.Context, vmName string) *logrus.Entry {
+	entry := util.Log(ctx, v.logger)
+	if vmName != "" {
+		entry = entry.WithField("vm", vmName)
+	}
+	return entry
 }
 
 type NewVM struct {
