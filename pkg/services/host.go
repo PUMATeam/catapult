@@ -6,9 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/go-chi/chi/middleware"
-
-	log "github.com/sirupsen/logrus"
+	logrus "github.com/sirupsen/logrus"
 
 	node "github.com/PUMATeam/catapult/pkg/node"
 	"github.com/PUMATeam/catapult/pkg/util"
@@ -18,17 +16,17 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-func NewHostsService(hr repositories.Hosts, logger *log.Logger, connManager *node.Connections) Hosts {
+func NewHostsService(hr repositories.Hosts, log *logrus.Logger, connManager *node.Connections) Hosts {
 	return &hostsService{
 		hostsRepository: hr,
-		log:             logger,
+		logger:          log,
 		connManager:     connManager,
 	}
 }
 
 type hostsService struct {
 	hostsRepository repositories.Hosts
-	log             *log.Logger
+	logger          *logrus.Logger
 	connManager     *node.Connections
 }
 
@@ -58,12 +56,7 @@ func (hs *hostsService) InitializeHosts(ctx context.Context) []error {
 				if err == nil {
 					hs.UpdateHostStatus(ctx, h, model.UP)
 				} else {
-					hs.log.WithContext(ctx).
-						WithFields(log.Fields{
-							"host":    h.Name,
-							"address": address,
-						}).
-						Error("Failed to initialize host connection")
+					hs.log(ctx, h.Name).Error("Failed to initialize host connection")
 
 					errors = append(errors, err)
 					hs.UpdateHostStatus(ctx, h, model.DOWN)
@@ -91,37 +84,24 @@ func (hs *hostsService) updateHostStatus(ctx context.Context, host *model.Host, 
 }
 
 func (hs *hostsService) Validate(ctx context.Context, host NewHost) error {
-	hs.log.WithContext(ctx).
-		WithFields(log.Fields{
-			"requestID": ctx.Value(middleware.RequestIDKey),
-			"host":      host.Name,
-		}).
-		Info("Validating host")
+	hs.log(ctx, host.Name).Info("Validating host")
 
 	h, err := hs.hostsRepository.HostByAddress(ctx, host.Address)
 	if err != nil {
-		hs.log.Error(err)
+		hs.log(ctx, h.Name).Error(err)
 		return err
 	}
 	if h.ID != uuid.Nil && h.Status != model.FAILED {
-		hs.log.WithContext(ctx).
-			WithFields(log.Fields{
-				"requestID": ctx.Value(middleware.RequestIDKey),
-				"host":      host.Name,
-			}).Errorf("Host with address %s already exists", host.Address)
+		hs.log(ctx, host.Name).Errorf("Host with address %s already exists", host.Address)
 		return ErrAlreadyExists
 	}
 	h, err = hs.hostsRepository.HostByName(ctx, host.Name)
 	if err != nil {
-		log.Error(err)
+		hs.log(ctx, "").Error(err)
 		return err
 	}
 	if h.ID != uuid.Nil && h.Status != model.FAILED {
-		hs.log.WithContext(ctx).
-			WithFields(log.Fields{
-				"requestID": ctx.Value(middleware.RequestIDKey),
-				"host":      host.Name,
-			}).Error("Host with this name already exists")
+		hs.log(ctx, host.Name).Error("Host with this name already exists")
 
 		return ErrAlreadyExists
 	}
@@ -167,33 +147,22 @@ func (hs *hostsService) InstallHost(ctx context.Context, h *model.Host, localNod
 		h.User,
 		h.Address,
 		util.StructToMap(hi, strings.ToLower),
-		hs.log)
+		hs.logger)
 
 	err := ac.ExecuteAnsible()
 	if err != nil {
-		hs.log.WithContext(ctx).
-			WithFields(log.Fields{
-				"requestID": ctx.Value(middleware.RequestIDKey),
-				"host":      h.Name,
-			}).Error("Error during host install: ", err)
+		hs.log(ctx, h.Name).Error("Error during host install: ", err)
 		hs.UpdateHostStatus(ctx, h, model.FAILED)
 		return
 	}
 	address := fmt.Sprintf("%s:%d", h.Address, h.Port)
-	hs.log.WithContext(ctx).
-		WithFields(log.Fields{
-			"requestID": ctx.Value(middleware.RequestIDKey),
-			"host":      h.Name,
-			"address":   address,
-		}).Info("Create grpc connection for host")
+	hs.log(ctx, h.Name).
+		WithField("address", address).
+		Info("Create grpc connection for host")
 
 	_, err = hs.connManager.CreateConnection(ctx, h.ID, address)
 	if err != nil {
-		hs.log.WithContext(ctx).
-			WithFields(log.Fields{
-				"requestID": ctx.Value(middleware.RequestIDKey),
-				"host":      h.Name,
-			}).Error("Failed to create grpc connections, will be retried upon sending a request")
+		hs.log(ctx, h.Name).Error("Failed to create grpc connections, will be retried upon sending a request")
 
 	}
 
@@ -202,19 +171,11 @@ func (hs *hostsService) InstallHost(ctx context.Context, h *model.Host, localNod
 }
 
 func (hs *hostsService) UpdateHostStatus(ctx context.Context, host *model.Host, status model.Status) error {
-	hs.log.WithContext(ctx).
-		WithFields(log.Fields{
-			"requestID": ctx.Value(middleware.RequestIDKey),
-			"host":      host.Name,
-		}).Infof("Updating status of host to %d", status)
+	hs.log(ctx, host.Name).Infof("Updating status of host to %d", status)
 
 	err := hs.updateHostStatus(ctx, host, model.UP)
 	if err != nil {
-		hs.log.WithContext(ctx).
-			WithFields(log.Fields{
-				"requestID": ctx.Value(middleware.RequestIDKey),
-				"host":      host.Name,
-			}).Errorf("Failed to update status of host to %d", status)
+		hs.log(ctx, host.Name).Errorf("Failed to update status of host to %d", status)
 		return err
 	}
 
@@ -223,6 +184,14 @@ func (hs *hostsService) UpdateHostStatus(ctx context.Context, host *model.Host, 
 
 func (hs *hostsService) GetConnManager(ctx context.Context) *node.Connections {
 	return hs.connManager
+}
+
+func (hs *hostsService) log(ctx context.Context, hostName string) *logrus.Entry {
+	entry := util.Log(ctx, hs.logger)
+	if hostName != "" {
+		entry = entry.WithField("host", hostName)
+	}
+	return entry
 }
 
 type NewHost struct {

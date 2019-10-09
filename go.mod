@@ -10,6 +10,7 @@ require (
 	github.com/go-chi/chi v4.0.2+incompatible
 	github.com/go-chi/render v1.0.1
 	github.com/go-kit/kit v0.9.0
+	github.com/go-openapi/runtime v0.19.3
 	github.com/go-pg/migrations v6.7.3+incompatible
 	github.com/go-pg/pg v8.0.5+incompatible
 	github.com/golang/protobuf v1.3.2
