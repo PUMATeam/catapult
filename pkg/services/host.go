@@ -45,7 +45,11 @@ func (hs *hostsService) InitializeHosts(ctx context.Context) []error {
 
 	for _, host := range hosts {
 		address := fmt.Sprintf("%s:%d", host.Address, host.Port)
-		if host.Status == model.UP {
+		switch host.Status {
+		case model.INSTALLING:
+			hs.log(ctx, host.Name).Info("Host in status INSTALLING, moving to DOWN")
+			hs.UpdateHostStatus(ctx, &host, model.DOWN)
+		case model.UP:
 			// Set host status to INITIALIZING during intialization
 			hs.UpdateHostStatus(ctx, &host, model.INITIALIZING)
 			go func(h *model.Host) {
