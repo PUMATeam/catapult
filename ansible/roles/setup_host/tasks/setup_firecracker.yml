@@ -7,21 +7,5 @@
   file:
     path: ./firecracker
     mode: 0755
-
-- name: download firecracker kernel
-  get_url:
-    url: https://github.com/firecracker-microvm/firecracker-demo/blob/master/vmlinux?raw=true
-    dest: ./vmlinux
-
-- name: download firecracker fs
-  get_url:
-    url: https://github.com/firecracker-microvm/firecracker-demo/blob/master/xenial.rootfs.ext4?raw=true
-    dest: ./xenial.rootfs.ext4
-
-- name: download xenial private key
-  get_url:
-    url: https://github.com/firecracker-microvm/firecracker-demo/blob/master/xenial.rootfs.id_rsa?raw=true
-    dest: ./fc.id_rsa
-    mode: 0400
-
+    
 - import_tasks: install_go.yml
