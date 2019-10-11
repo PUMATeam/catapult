@@ -173,7 +173,7 @@ func (hs *hostsService) InstallHost(ctx context.Context, h *model.Host, localNod
 func (hs *hostsService) UpdateHostStatus(ctx context.Context, host *model.Host, status model.Status) error {
 	hs.log(ctx, host.Name).Infof("Updating status of host to %d", status)
 
-	err := hs.updateHostStatus(ctx, host, model.UP)
+	err := hs.updateHostStatus(ctx, host, status)
 	if err != nil {
 		hs.log(ctx, host.Name).Errorf("Failed to update status of host to %d", status)
 		return err
