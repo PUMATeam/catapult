@@ -162,8 +162,8 @@ func (hs *hostsService) InstallHost(ctx context.Context, h *model.Host, localNod
 
 	_, err = hs.connManager.CreateConnection(ctx, h.ID, address)
 	if err != nil {
+		hs.log(ctx, h.Name).Error(err)
 		hs.log(ctx, h.Name).Error("Failed to create grpc connections, will be retried upon sending a request")
-
 	}
 
 	// TODO send a health check to the host before
