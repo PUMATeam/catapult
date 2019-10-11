@@ -7,6 +7,8 @@
   shell: go build "{{ local_node_path }}"
   args:
     chdir: "{{ local_node_path }}"
+  environment:
+    GOOS: linux
   delegate_to: localhost
   when: local_node_path is defined
 
@@ -28,6 +30,7 @@
       chdir: src/catapult-node
     environment:
       GOROOT: /usr/local/go
+      GOOS: linux
       PATH: "/usr/local/go/bin:{{ ansible_env.PATH }}"
 
   - name: copy catapult-node executable to $HOME
