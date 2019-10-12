@@ -31,11 +31,13 @@ func NewNodeConnectionManager() *Connections {
 // and stores it in the nodeToConn map with a mapping of
 // nodeID -> conn
 func (n *Connections) CreateConnection(ctx context.Context, nodeID uuid.UUID, address string) (*grpc.ClientConn, error) {
-	ctx, cancel := context.WithTimeout(ctx, time.Duration(10)*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
+
 	conn, err := grpc.DialContext(ctx,
 		address,
-		grpc.WithBlock(), grpc.WithInsecure())
+		grpc.WithBlock(),
+		grpc.WithInsecure())
 	if err != nil {
 		return nil, err
 	}
