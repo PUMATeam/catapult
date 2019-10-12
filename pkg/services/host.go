@@ -159,15 +159,16 @@ func (hs *hostsService) InstallHost(ctx context.Context, h *model.Host, localNod
 		hs.UpdateHostStatus(ctx, h, model.FAILED)
 		return
 	}
+
 	address := fmt.Sprintf("%s:%d", h.Address, h.Port)
+
 	hs.log(ctx, h.Name).
 		WithField("address", address).
-		Info("Create grpc connection for host")
-
+		Info("Createting grpc connection for host...")
 	_, err = hs.connManager.CreateConnection(ctx, h.ID, address)
 	if err != nil {
-		hs.log(ctx, h.Name).Error(err)
-		hs.log(ctx, h.Name).Error("Failed to create grpc connections, will be retried upon sending a request")
+		hs.log(ctx, h.Name).Error("Failed to create grpc connections, "+
+			"will be retried upon sending a request: ", err)
 	}
 
 	// TODO send a health check to the host before
