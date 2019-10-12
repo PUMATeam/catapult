@@ -8,6 +8,7 @@ require (
 	github.com/PUMATeam/catapult-node v0.0.0-20190815120439-f8f0b7fc4397 // indirect
 	github.com/firecracker-microvm/firecracker-go-sdk v0.17.0 // indirect
 	github.com/go-chi/chi v4.0.2+incompatible
+	github.com/go-chi/cors v1.0.0
 	github.com/go-chi/render v1.0.1
 	github.com/go-kit/kit v0.9.0
 	github.com/go-openapi/runtime v0.19.3
