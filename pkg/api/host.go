@@ -36,6 +36,14 @@ func hostsEndpoints(r *chi.Mux, hs services.Hosts) {
 		encodeResponse,
 	)
 	r.Method(http.MethodGet, "/hosts/{hostID}", hostByIDHandler)
+
+	installHostHandler := httptransport.NewServer(
+		installHostEndpoint(hs),
+		decodeInstallHostReq,
+		encodeResponse,
+	)
+	r.Method(http.MethodPost, "/hosts/{hostID}/install", installHostHandler)
+
 }
 
 func addHostEndpoint(svc services.Hosts) endpoint.Endpoint {
@@ -79,6 +87,27 @@ func addHostEndpoint(svc services.Hosts) endpoint.Endpoint {
 	}
 }
 
+func installHostEndpoint(svc services.Hosts) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		log.Info("install host")
+		rh := request.(services.HostReinstall)
+		host, err := svc.HostByID(ctx, rh.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		log.WithContext(ctx).
+			WithFields(logrus.Fields{
+				"requestID": ctx.Value(middleware.RequestIDKey),
+				"host":      host.Name,
+			}).Info("Installing host")
+
+		go svc.InstallHost(ctx, &host, "" /*local node path*/)
+
+		return IDResponse{ID: host.ID}, err
+	}
+}
+
 func hostsEndpoint(hs services.Hosts) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		hosts, err := hs.ListHosts(ctx)
@@ -103,6 +132,16 @@ func decodeAddHostReq(_ context.Context, r *http.Request) (interface{}, error) {
 	if install != "" && install == "true" {
 		host.ShouldInstall = true
 	}
+
+	return host, err
+}
+
+func decodeInstallHostReq(_ context.Context, r *http.Request) (interface{}, error) {
+	defer r.Body.Close()
+	var host services.HostReinstall
+	id, err := uuid.FromString(chi.URLParam(r, "hostID"))
+	host.ID = id
+	err = json.NewDecoder(r.Body).Decode(&host)
 
 	return host, err
 }

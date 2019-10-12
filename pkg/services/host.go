@@ -137,7 +137,7 @@ func (hs *hostsService) AddHost(ctx context.Context, newHost *NewHost) (uuid.UUI
 // TODO: leaving it as public to allow a user add a host
 // without installing right away
 func (hs *hostsService) InstallHost(ctx context.Context, h *model.Host, localNodePath string) {
-	hi := hostInstall{
+	hi := hostInstallData{
 		User:            h.User,
 		FcVersion:       fcVersion,
 		AnsiblePassword: h.Password,
@@ -209,7 +209,12 @@ type NewHost struct {
 	Port          int    `json:"port"`
 }
 
-type hostInstall struct {
+type HostReinstall struct {
+	ID            uuid.UUID `json:"id"`
+	LocalNodePath string    `json:"local_node_path"`
+}
+
+type hostInstallData struct {
 	User            string `json:"ignore"`
 	AnsiblePassword string `json:"ansible_ssh_pass"`
 	FcVersion       string
