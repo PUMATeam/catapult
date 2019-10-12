@@ -140,6 +140,10 @@ func decodeInstallHostReq(_ context.Context, r *http.Request) (interface{}, erro
 	defer r.Body.Close()
 	var host services.HostReinstall
 	id, err := uuid.FromString(chi.URLParam(r, "hostID"))
+	if err != nil {
+		return nil, err
+	}
+
 	host.ID = id
 	err = json.NewDecoder(r.Body).Decode(&host)
 
