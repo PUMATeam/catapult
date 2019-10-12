@@ -15,6 +15,7 @@ import (
 	"github.com/PUMATeam/catapult/pkg/util"
 
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/cors"
 
 	"github.com/PUMATeam/catapult/pkg/repositories"
 	"github.com/PUMATeam/catapult/pkg/services"
@@ -31,7 +32,7 @@ func newAPI(hs services.Hosts,
 	vs services.VMs) http.Handler {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID)
-
+	r.Use(enableCors().Handler)
 	hostsEndpoints(r, hs)
 	vmsEndpoints(r, vs)
 
@@ -135,4 +136,18 @@ func codeFrom(err error) int {
 	default:
 		return http.StatusInternalServerError
 	}
+}
+
+func enableCors() *cors.Cors {
+	cors := cors.New(cors.Options{
+		// AllowedOrigins: []string{"https://foo.com"}, // Use this to allow specific origin hosts
+		AllowedOrigins: []string{"*"},
+		// AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	})
+	return cors
 }
