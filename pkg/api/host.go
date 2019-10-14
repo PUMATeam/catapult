@@ -80,7 +80,12 @@ func addHostEndpoint(svc services.Hosts) endpoint.Endpoint {
 					"requestID": ctx.Value(middleware.RequestIDKey),
 					"host":      req.Name,
 				}).Info("Installing host")
-			go svc.InstallHost(ctx, &h, req.LocalNodePath)
+			go svc.InstallHost(
+				context.WithValue(ctx,
+					middleware.RequestIDKey,
+					ctx.Value(middleware.RequestIDKey)),
+				&h,
+				req.LocalNodePath)
 		}
 
 		return IDResponse{ID: id}, err
