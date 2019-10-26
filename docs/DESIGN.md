@@ -21,25 +21,6 @@ curl -XPOST http://localhost:8888/hosts -d '{ "name":"hosto", "address": "192.16
 curl -XPOST http://localhost:8888/vms/start -d '{ "id": "792a4940-49d1-4255-b31c-ed4a169dcc1c", "name": "hello", "status": 0, "host_id": "792a4940-49d1-4255-b31c-ed4a169dcc1c", "vcpu": 1, "memory":128}'
 ```
 
-# Creating custom rootfs (with sshd)
-
-Currently I have to use ubuntu, trying to use Centos proved unlucky, might try with fedora later.
-
-```
-$ truncate -s 1G rootfs
-
-$ mkfs.ext4 rootfs
-
-$ sudo mount rootfs /mnt/rootfs
-
-$ debootstrap --include openssh-server,vim bionic /mnt/rootfs http://archive.ubuntu.com/ubuntu/
-
-$ sudo chroot /mnt/rootfs /bin/bash
-
-$ passwd # set root password
-
-$ sudo umount /mnt/rootfs
-```
 
 # Networking
 Set
