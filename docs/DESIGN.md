@@ -54,3 +54,12 @@ from the API (there's no "virsh dumpxml") as far as I know
 
 - We should be able to de/activate a host - an ansible script to start/stop
   the catapult-node process
+
+# Storage
+- catapult-storage will leverage cinderlib to CRUD ceph volumes
+  - How does it communicate? Direct gRPC? Do we need 0mq in the middle?
+  	- Maybe a "mutlicast" operation, send a "create volume" request and the first available
+    	  host will attempt to fulfil it
+	- Suppose a host failed to complete the request in a reasonable time, the manager can
+	  retransmit the request and another host will pick it up. If the original host did not
+	  realize it was retransmitted, it would be fenced and the host will rollback.
