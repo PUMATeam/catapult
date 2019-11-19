@@ -35,6 +35,7 @@ func newAPI(hs services.Hosts,
 	r.Use(enableCors().Handler)
 	hostsEndpoints(r, hs)
 	vmsEndpoints(r, vs)
+	storageEndpoints(r)
 
 	return r
 }
