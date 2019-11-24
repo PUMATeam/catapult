@@ -18,6 +18,7 @@ type NodeService interface {
 	ListVMs(ctx context.Context) ([]uuid.UUID, error)
 	StartVM(ctx context.Context, vm model.VM) (*VmConfig, error)
 	StopVM(ctx context.Context, vmID uuid.UUID) error
+	CreateDrive(ctx context.Context, image string) (string, int64, error)
 }
 
 type Node struct {
@@ -107,6 +108,23 @@ func (n *Node) StopVM(ctx context.Context, vmID uuid.UUID) error {
 		}).Infof("Stopped VM %v", vmID)
 
 	return err
+}
+
+func (n *Node) CreateDrive(ctx context.Context, image string) (string, int64, error) {
+	f := func(conn *grpc.ClientConn) (interface{}, error) {
+		client := NewNodeClient(conn)
+		return client.CreateDrive(ctx, &ImageName{Name: image})
+	}
+
+	conn := n.connManager.GetConnection(n.Host.ID)
+	resp, err := runOnNode(conn, f)
+	if err != nil {
+		return "", -1, err
+	}
+
+	driveResp := resp.(*DriveResponse)
+
+	return driveResp.GetPath(), driveResp.GetSize(), err
 }
 
 type executeOnNode func(conn *grpc.ClientConn) (interface{}, error)

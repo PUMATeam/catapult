@@ -225,6 +225,22 @@ func (hs *hostsService) UpdateHostStatus(ctx context.Context, host *model.Host, 
 	return nil
 }
 
+func (hs *hostsService) FindHostUP(ctx context.Context) *model.Host {
+	hosts, err := hs.ListHosts(ctx)
+	hs.log(ctx, "").Info("hosts found: ", hosts)
+	if err != nil {
+		hs.log(ctx, "").Error(err)
+	}
+
+	for _, h := range hosts {
+		if h.Status == model.UP {
+			return &h
+		}
+	}
+
+	return nil
+}
+
 func (hs *hostsService) GetConnManager(ctx context.Context) *node.Connections {
 	return hs.connManager
 }
