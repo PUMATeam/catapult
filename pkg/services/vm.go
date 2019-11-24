@@ -54,7 +54,7 @@ func (v *vmsService) AddVM(ctx context.Context, vm NewVM) (uuid.UUID, error) {
 func (v *vmsService) StartVM(ctx context.Context, vmID uuid.UUID) (*model.VM, error) {
 	// TODO: algorithm should be - look for a host in status up and run the
 	// VM on it
-	h := v.findHostUP(ctx)
+	h := v.hostsService.FindHostUP(ctx)
 	if h == nil {
 		return nil, fmt.Errorf("Could not find host in status up")
 	}
@@ -114,22 +114,6 @@ func (v *vmsService) VMByID(ctx context.Context, vmID uuid.UUID) (model.VM, erro
 	}
 
 	return vm, nil
-}
-
-func (v *vmsService) findHostUP(ctx context.Context) *model.Host {
-	hosts, err := v.hostsService.ListHosts(ctx)
-	v.log(ctx, "").Info("hosts found: ", hosts)
-	if err != nil {
-		v.log(ctx, "").Error(err)
-	}
-
-	for _, h := range hosts {
-		if h.Status == model.UP {
-			return &h
-		}
-	}
-
-	return nil
 }
 
 func (v *vmsService) log(ctx context.Context, vmName string) *logrus.Entry {

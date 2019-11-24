@@ -8,7 +8,7 @@ import (
 	grpc "google.golang.org/grpc"
 )
 
-type StorageService interface {
+type Service interface {
 	Create(ctx context.Context, volume *Volume) (*Response, error)
 	Delete(ctx context.Context, volID *uuid.UUID) (*Response, error)
 	List(ctx context.Context) (*VolumeList, error)

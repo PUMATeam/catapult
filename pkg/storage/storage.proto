@@ -9,7 +9,7 @@ message UUID {
 
 message Volume {
     string UUID = 1;
-    int32 size = 2;
+    int64 size = 2;
 }
 
 message Response {
@@ -30,4 +30,3 @@ service Storage {
     rpc Remove(UUID) returns (Response) {}
     rpc List(google.protobuf.Empty) returns (VolumeList) {}
 }
-

@@ -20,6 +20,7 @@ type Hosts interface {
 	ActivateHost(ctx context.Context, h *model.Host)
 	GetConnManager(ctx context.Context) *node.Connections
 	InitializeHosts(ctx context.Context) []error
+	FindHostUP(ctx context.Context) *model.Host
 }
 
 type VMs interface {
@@ -30,6 +31,10 @@ type VMs interface {
 	StopVM(ctx context.Context, vm *model.VM) (uuid.UUID, error)
 	UpdateVMStatus(ctx context.Context, vm *model.VM, status model.Status) error
 	VMByID(ctx context.Context, vmID uuid.UUID) (model.VM, error)
+}
+
+type Volumes interface {
+	AddVolume(ctx context.Context, volume VolumeReq) (uuid.UUID, error)
 }
 
 var (
