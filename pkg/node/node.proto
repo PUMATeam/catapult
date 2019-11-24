@@ -17,11 +17,15 @@ message VmConfig {
 }
 
 enum Status {
-    SUCCESSFUL = 0;
+    SUCCESS = 0;
     FAILED = 1;
 }
 
 message Response {
+    Status status = 1;
+}
+
+message VmResponse {
     Status status = 1;
     VmConfig config = 2;
 }
@@ -37,12 +41,19 @@ message ImageName {
 message DriveResponse {
     Status status = 1;
     int64 size = 2;
+    string path = 3;
+}
+
+message Volume {
+    string volumeID = 1;
+    string poolName = 2;
 }
 
 service Node {
-    rpc StartVM(VmConfig) returns (Response) {}
+    rpc StartVM(VmConfig) returns (VmResponse) {}
     rpc StopVM(UUID) returns (Response) {}
     rpc ListVMs(google.protobuf.Empty) returns (VmList) {}
 
     rpc CreateDrive(ImageName) returns (DriveResponse) {}
+    rpc ConnectVolume(Volume) returns (Response) {}
 }

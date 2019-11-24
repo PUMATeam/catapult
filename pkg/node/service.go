@@ -49,7 +49,7 @@ func (n *Node) StartVM(ctx context.Context, vm model.VM) (*VmConfig, error) {
 	}
 
 	// TODO: make port configurable
-	f := func(conn *grpc.ClientConn) (*Response, error) {
+	f := func(conn *grpc.ClientConn) (interface{}, error) {
 		client := NewNodeClient(conn)
 		log.Info("Sending start vm request...")
 		return client.StartVM(ctx, vmConfig)
@@ -70,14 +70,15 @@ func (n *Node) StartVM(ctx context.Context, vm model.VM) (*VmConfig, error) {
 	}
 
 	resp, err := runOnNode(conn, f)
+	vmResp := resp.(*VmResponse)
 
 	log.WithContext(ctx).
 		WithFields(log.Fields{
 			"requestID": ctx.Value(middleware.RequestIDKey),
 			"vm":        vm.Name,
-		}).Infof("Returned VM %v", resp.GetConfig())
+		}).Infof("Returned VM %v", vmResp.GetConfig())
 
-	return resp.GetConfig(), err
+	return vmResp.GetConfig(), err
 }
 
 // ListVMs lists VMs available on a node
@@ -91,26 +92,26 @@ func (n *Node) StopVM(ctx context.Context, vmID uuid.UUID) error {
 		Value: vmID.String(),
 	}
 
-	f := func(conn *grpc.ClientConn) (*Response, error) {
+	f := func(conn *grpc.ClientConn) (interface{}, error) {
 		client := NewNodeClient(conn)
 		return client.StopVM(ctx, uuid)
 	}
 
 	conn := n.connManager.GetConnection(n.Host.ID)
-	resp, err := runOnNode(conn, f)
+	_, err := runOnNode(conn, f)
 
 	log.WithContext(ctx).
 		WithFields(log.Fields{
 			"requestID": ctx.Value(middleware.RequestIDKey),
 			"vm":        vmID,
-		}).Infof("Stopped VM %v", resp.GetConfig())
+		}).Infof("Stopped VM %v", vmID)
 
 	return err
 }
 
-type executeOnNode func(conn *grpc.ClientConn) (*Response, error)
+type executeOnNode func(conn *grpc.ClientConn) (interface{}, error)
 
-func runOnNode(conn *grpc.ClientConn, f executeOnNode) (*Response, error) {
+func runOnNode(conn *grpc.ClientConn, f executeOnNode) (interface{}, error) {
 	resp, err := f(conn)
 	return resp, err
 }
