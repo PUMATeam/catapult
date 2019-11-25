@@ -35,15 +35,39 @@ func (v *volumesService) AddVolume(ctx context.Context, volume VolumeReq) (uuid.
 	}
 
 	nodeService := node.NewNodeService(h, v.hostsService.GetConnManager(ctx))
-	path, size, err := nodeService.CreateDrive(ctx, volume.imageName)
-	v.storageService.Create(ctx, &storage.Volume{
+	path, size, err := nodeService.CreateDrive(ctx, volume.ImageName)
+	if err != nil {
+		logger.Infof("After create drive")
+		logger.
+			WithContext(ctx).
+			Error(err)
+		return uuid.Nil, err
+	}
+	_, err = v.storageService.Create(ctx, &storage.Volume{
 		UUID: volID.String(),
 		Size: size,
 	})
+	if err != nil {
+		logger.
+			WithContext(ctx).
+			Error(err)
+		return uuid.Nil, err
+	}
+
+	logger.WithContext(ctx).WithField("path", path).Infof("Created drive")
+
+	nodeService.ConnectVolume(ctx,
+		&node.Volume{VolumeID: volID.String(),
+			PoolName: "volumes"})
+
+	logger.WithContext(ctx).
+		WithField("volume", volID).
+		WithField("size", size).
+		Infof("Mapped volume")
 
 	return volID, err
 }
 
 type VolumeReq struct {
-	imageName string `json:"image"`
+	ImageName string `json:"image"`
 }

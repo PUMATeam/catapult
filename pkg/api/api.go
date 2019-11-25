@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"syscall"
 
+	"github.com/PUMATeam/catapult/pkg/storage"
+
 	logrus "github.com/sirupsen/logrus"
 
 	"github.com/PUMATeam/catapult/pkg/node"
@@ -61,8 +63,10 @@ func bootstrap(log *logrus.Logger) http.Handler {
 
 	vr := repositories.NewVMsRepository(db)
 	vs := services.NewVMsService(vr, hs, log)
+	ss := storage.NewStorageService()
+	vls := services.NewVolumesService(hs, ss, log)
 
-	return newAPI(hs, vs)
+	return newAPI(hs, vs, vls)
 }
 
 // Start start the server and listens on the provided port

@@ -19,6 +19,7 @@ type NodeService interface {
 	StartVM(ctx context.Context, vm model.VM) (*VmConfig, error)
 	StopVM(ctx context.Context, vmID uuid.UUID) error
 	CreateDrive(ctx context.Context, image string) (string, int64, error)
+	ConnectVolume(ctx context.Context, volume *Volume) error
 }
 
 type Node struct {
@@ -125,6 +126,26 @@ func (n *Node) CreateDrive(ctx context.Context, image string) (string, int64, er
 	driveResp := resp.(*DriveResponse)
 
 	return driveResp.GetPath(), driveResp.GetSize(), err
+}
+
+func (n *Node) ConnectVolume(ctx context.Context, volume *Volume) error {
+	f := func(conn *grpc.ClientConn) (interface{}, error) {
+		client := NewNodeClient(conn)
+		return client.ConnectVolume(ctx, volume)
+	}
+
+	conn := n.connManager.GetConnection(n.Host.ID)
+	_, err := runOnNode(conn, f)
+	if err != nil {
+		return err
+	}
+
+	log.WithContext(ctx).
+		WithFields(log.Fields{
+			"requestID": ctx.Value(middleware.RequestIDKey),
+		}).Infof("Connected volume %v", volume)
+
+	return err
 }
 
 type executeOnNode func(conn *grpc.ClientConn) (interface{}, error)

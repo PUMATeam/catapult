@@ -46,8 +46,8 @@ func addVMEndpoint(svc services.VMs) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(services.NewVM)
 		id, err := svc.AddVM(ctx, req)
-		resp := IDResponse{ID: id}
-		return resp, err
+
+		return IDResponse{ID: id}, err
 	}
 }
 
