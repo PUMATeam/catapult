@@ -8,6 +8,7 @@ import (
 	grpc "google.golang.org/grpc"
 )
 
+// TODO: move to internal?
 type Service interface {
 	Create(ctx context.Context, volume *Volume) (*Response, error)
 	Delete(ctx context.Context, volID *uuid.UUID) (*Response, error)
@@ -15,6 +16,10 @@ type Service interface {
 }
 
 type Storage struct {
+}
+
+func NewStorageService() *Storage {
+	return &Storage{}
 }
 
 func (s *Storage) Create(ctx context.Context, volume *Volume) (*Response, error) {
