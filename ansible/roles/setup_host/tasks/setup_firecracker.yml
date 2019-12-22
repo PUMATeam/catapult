@@ -1,6 +1,6 @@
 - name: download firecracker
   get_url:
-    url: "https://github.com/firecracker-microvm/firecracker/releases/download/v{{ fcversion }}/firecracker-v{{ fcversion}}"
+    url: "https://github.com/firecracker-microvm/firecracker/releases/download/v{{ fcversion }}/firecracker-v{{ fcversion}}-x86_64"
     dest: ./firecracker
 
 - name: set execute permissions
