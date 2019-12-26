@@ -22,23 +22,6 @@ curl -XPOST http://localhost:8888/hosts\?install\=true -d '{ "name":"hosto", "ad
 curl -XPOST http://localhost:8888/vms -d '{ "name": "hello", "vcpu": 1, "memory": 128, "kernel": "vmlinux", "rootfs": "rootfs" }'
 ```
 
-
-# Networking
-Set
-```
-sysctl -w net.ipv4.conf.all.forwarding=1
-```
-Create a bridge
-```
-$ brctl addbr br0
-$ ip addr flush dev eth0 # flush ip
-$ brctl addif br0 eth0 # add eth0 to the bridge
-$ dhclient -v br0
-$ ip tuntap add dev fc-tap-$UUID mode tap
-$ brctl addif br0 fc-tap-$UUID
-$ ip link set fc-tap-$UUID up
- ```
-
 # Stuff to think about
 - How to load existing VMs when catapult-node starts?
   - Use an sqlite3 db and consider it the only source of truth
