@@ -16,9 +16,10 @@
 
 # Example requests
 ```
-curl -XPOST http://localhost:8888/hosts -d '{ "name":"hosto", "address": "192.168.122.5", "user": "root", "password": "centos"}'
-
-curl -XPOST http://localhost:8888/vms/start -d '{ "id": "792a4940-49d1-4255-b31c-ed4a169dcc1c", "name": "hello", "status": 0, "host_id": "792a4940-49d1-4255-b31c-ed4a169dcc1c", "vcpu": 1, "memory":128}'
+curl -XPOST http://localhost:8888/hosts\?install\=true -d '{ "name":"hosto", "address": "192.168.122.45", "user": "root", "password": "centos", "rootfs": "rootfs", "kernel": "vmlinux", "local_node_path": "/home/benny/Development/go/src/github.com/PUMATeam/catapult-node", "port": 8001}'
+```
+```
+curl -XPOST http://localhost:8888/vms -d '{ "name": "hello", "vcpu": 1, "memory": 128, "kernel": "vmlinux", "rootfs": "rootfs" }'
 ```
 
 
