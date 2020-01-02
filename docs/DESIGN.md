@@ -40,10 +40,13 @@ from the API (there's no "virsh dumpxml") as far as I know
   the catapult-node process
 
 # Storage
-- catapult-storage will leverage cinderlib to CRUD ceph volumes
-  - How does it communicate? Direct gRPC? Do we need 0mq in the middle?
-  	- Maybe a "mutlicast" operation, send a "create volume" request and the first available
-    	  host will attempt to fulfil it
-	- Suppose a host failed to complete the request in a reasonable time, the manager can
-	  retransmit the request and another host will pick it up. If the original host did not
-	  realize it was retransmitted, it would be fenced and the host will rollback.
+- Currently using ceph via cinderlib:
+- Current flow:
+  - Receive OCI image name
+  - Send it to catapult-node
+    - Fetch the image using containers/image
+    - Unpack it to rootfs using OCI images tool
+    - Create an nbd device
+    - Map the rbd volume (using rbd-nbd, in the future cinderlib#connect_volume should do)
+    - Copy rootfs content to the rbd device
+  - Send gRPC request with image name to catapult-storage (exposing cinderlib API over gRPC)
