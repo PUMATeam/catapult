@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"math"
 
 	node "github.com/PUMATeam/catapult/pkg/node"
 	"github.com/PUMATeam/catapult/pkg/repositories"
@@ -37,15 +38,21 @@ func (v *volumesService) AddVolume(ctx context.Context, volume VolumeReq) (uuid.
 	nodeService := node.NewNodeService(h, v.hostsService.GetConnManager(ctx))
 	path, size, err := nodeService.CreateDrive(ctx, volume.ImageName)
 	if err != nil {
-		logger.Infof("After create drive")
 		logger.
 			WithContext(ctx).
 			Error(err)
 		return uuid.Nil, err
 	}
+
+	// TODO: extract to util
+	volSize := int64(math.Ceil(float64(size) / (1024 * 1024 * 1024)))
+	logger.WithContext(ctx).Infof("Creating volume %v with size %s GiB",
+		volID,
+		volSize)
 	_, err = v.storageService.Create(ctx, &storage.Volume{
 		UUID: volID.String(),
-		Size: size,
+
+		Size: volSize,
 	})
 	if err != nil {
 		logger.
