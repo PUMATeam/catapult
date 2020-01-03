@@ -9,6 +9,7 @@ ip link add fcbridge type bridge
 ip link set fcbridge up
 ip addr flush dev eth0
 ip link set eth0 master fcbridge
-ip addr add "${IP_WITH_CIDR}" brd + dev fcbridge
-ip route add default via "${DEFAULT_ROUTE}"
-ip route add "${ROUTE}"  dev fcbridge proto kernel scope link src "${IP}"
+ip addr add $IP_WITH_CIDR brd + dev fcbridge
+ip route add default via $DEFAULT_ROUTE
+ip route add $ROUTE  dev fcbridge proto kernel scope link src $IP
+exit 0
