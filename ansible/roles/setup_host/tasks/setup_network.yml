@@ -22,13 +22,8 @@
     dest: setup_bridge.sh
     mode: u=rwx
 
-- name: install bridge-utils
-  package:
-    name: bridge-utils
-    state: present
-
 - name: check if bridge present
-  shell: brctl show | grep fcbridge
+  shell: ip addr show dev fcbridge | grep fcbridge
   register: fcbridge
   ignore_errors: true
 
