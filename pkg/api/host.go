@@ -107,7 +107,7 @@ func installHostEndpoint(svc services.Hosts) endpoint.Endpoint {
 				"host":      host.Name,
 			}).Info("Installing host")
 
-		go svc.InstallHost(ctx, &host, "" /*local node path*/)
+		go svc.InstallHost(ctx, &host, rh.LocalNodePath)
 
 		return IDResponse{ID: host.ID}, err
 	}
