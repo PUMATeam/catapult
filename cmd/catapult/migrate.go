@@ -31,7 +31,7 @@ var migrateCmd = &cobra.Command{
 			err = migration.Migrate(argsMig)
 		}
 		if err != nil {
-            log.Fatal(err)
+			log.Fatal(err)
 		}
 	},
 }

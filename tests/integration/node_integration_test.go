@@ -23,11 +23,11 @@ func setup() {
 	catapultNode = grpc.NewServer()
 
 	node.RegisterNodeServer(catapultNode, &MockNodeServer{})
-    go func() {
-        if err := catapultNode.Serve(lis); err != nil {
-            log.Fatal("failed to start grpc server", err)
-        }
-    }()
+	go func() {
+		if err := catapultNode.Serve(lis); err != nil {
+			log.Fatal("failed to start grpc server", err)
+		}
+	}()
 }
 
 func TestNodeApi(t *testing.T) {
@@ -37,7 +37,6 @@ func TestNodeApi(t *testing.T) {
 }
 
 type MockNodeServer struct {
-
 }
 
 func (*MockNodeServer) StartVM(context.Context, *node.VmConfig) (*node.Response, error) {
@@ -55,4 +54,3 @@ func (*MockNodeServer) ListVMs(context.Context, *empty.Empty) (*node.VmList, err
 func (*MockNodeServer) Health(context.Context, *empty.Empty) (*node.HealthCheckResponse, error) {
 	panic("implement me")
 }
-
