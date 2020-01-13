@@ -1,6 +1,6 @@
 #!/bin/bash
 
-test -z "$(gofmt -l ../../)"
+test -z "$(gofmt -l $GITHUB_WORKSPACE)"
 SUCCESS=$?
 
 if [ $SUCCESS -eq 0 ]; then
