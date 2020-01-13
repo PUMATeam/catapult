@@ -6,6 +6,7 @@ SUCCESS=$?
 if [ $SUCCESS -eq 0 ]; then
   exit 0
 else
-  gofmt -l ../../
+  echo Unformatted files:
+  echo "$(gofmt -l $GITHUB_WORKSPACE)"
 fi
 
