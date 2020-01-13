@@ -30,7 +30,7 @@ var connManager = node.NewNodeConnectionManager()
 
 func newAPI(hs services.Hosts,
 	vs services.VMs) http.Handler {
-	r := chi.NewRouter()
+	     r := chi.NewRouter()
 	r.Use(middleware.RequestID)
 	r.Use(enableCors().Handler)
 	hostsEndpoints(r, hs)
