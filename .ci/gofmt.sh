@@ -8,5 +8,6 @@ if [ $SUCCESS -eq 0 ]; then
 else
   echo Unformatted files:
   echo "$(gofmt -l $GITHUB_WORKSPACE)"
+  exit $SUCCESS
 fi
 
