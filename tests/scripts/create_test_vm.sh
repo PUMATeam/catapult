@@ -1,18 +1,17 @@
 #!/bin/bash
 
+OS_VERSION="fedora-31"
+PASSWORD="fedora"
 OS_IMG="os.img"
 if test -f "$FILE"; then
-    echo "$FILE exists, nothing to do"
-    exit 0
+  echo "$FILE exists, nothing to do"
+  exit 0
 fi
 
-if [ $# -eq 0 ]
-  then
-    URL="https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1503.qcow2"
-    echo "No image URL supplied, downloading ${URL}..."
+VIRT_BUILDER=$(which virt-builder)
+if [ $? -eq 0 ]; then
+  ${VIRT_BUILDER} ${OS_VERSION} --size 8G -o ${OS_IMG} --root-password password:${PASSWORD}
 else
-    URL=$1
-    echo "Downloading URL ${URL}..."
+  echo virt-builder not found
+  exit 1
 fi
-
-curl "${URL}" -o os.img
