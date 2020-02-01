@@ -7,8 +7,9 @@ import (
 )
 
 const (
-	SetupHostPlaybook  = "ansible/roles/setup_host/playbook.yml"
-	ansiblePlaybookCmd = "ansible-playbook"
+	SetupHostPlaybook    = "ansible/roles/setup_host/playbook.yml"
+	ActivateHostPlaybook = "ansible/roles/setup_host/activate_playbook.yml"
+	ansiblePlaybookCmd   = "ansible-playbook"
 )
 
 type AnsibleCommand struct {
