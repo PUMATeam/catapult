@@ -175,6 +175,45 @@ func (hs *hostsService) InstallHost(ctx context.Context, h *model.Host, localNod
 	hs.UpdateHostStatus(ctx, h, model.UP)
 }
 
+//  ActivateHost activate  on the host
+// TODO: leaving it as public to allow a user activate a host
+func (hs *hostsService) ActivateHost(ctx context.Context, h *model.Host) {
+	hi := hostInstallData{
+		User:            h.User,
+		AnsiblePassword: h.Password,
+		NodePort:        fmt.Sprintf("%d", h.Port),
+	}
+
+	hs.UpdateHostStatus(ctx, h, model.ACTIVATING)
+
+	ac := util.NewAnsibleCommand(util.ActivateHostPlaybook,
+		h.User,
+		h.Address,
+		util.StructToMap(hi, strings.ToLower),
+		hs.logger)
+
+	err := ac.ExecuteAnsible()
+	if err != nil {
+		hs.log(ctx, h.Name).Error("Error during catapult node activation: ", err)
+		hs.UpdateHostStatus(ctx, h, model.FAILED)
+		return
+	}
+
+	address := fmt.Sprintf("%s:%d", h.Address, h.Port)
+
+	hs.log(ctx, h.Name).
+		WithField("address", address).
+		Info("Createting grpc connection for host...")
+	_, err = hs.connManager.CreateConnection(ctx, h.ID, address)
+	if err != nil {
+		hs.log(ctx, h.Name).Error("Failed to create grpc connections, "+
+			"will be retried upon sending a request: ", err)
+	}
+
+	// TODO send a health check to the host before
+	hs.UpdateHostStatus(ctx, h, model.UP)
+}
+
 func (hs *hostsService) UpdateHostStatus(ctx context.Context, host *model.Host, status model.Status) error {
 	hs.log(ctx, host.Name).Infof("Updating status of host to %d", status)
 

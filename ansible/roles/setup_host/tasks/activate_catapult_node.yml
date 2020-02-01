@@ -1,0 +1,20 @@
+- name: check if catapult-node is running
+  command: pgrep catapult-node
+  register: catapult_node_running
+  ignore_errors: true
+
+- name: check catapult-node pgrep
+  debug:
+    msg: "{{ catapult_node_running }}"
+
+- name: copy start_catapult_node.sh to host
+  copy:
+    src: ./files/start_catapult_node.sh
+    dest: start_catapult_node.sh
+    mode: u=rwx
+
+- name: start catapult-node
+  command: nohup ./start_catapult_node.sh "{{ node_port }}" &
+  async: 10
+  poll: 0
+  when: catapult_node_running.rc == 1

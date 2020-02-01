@@ -44,6 +44,13 @@ func hostsEndpoints(r *chi.Mux, hs services.Hosts) {
 	)
 	r.Method(http.MethodPost, "/hosts/{hostID}/install", installHostHandler)
 
+	activationHostHandler := httptransport.NewServer(
+		activateHostEndpoint(hs),
+		decodeHostByIDRequest,
+		encodeResponse,
+	)
+	r.Method(http.MethodPost, "/hosts/{hostID}/activate", activationHostHandler)
+
 }
 
 func addHostEndpoint(svc services.Hosts) endpoint.Endpoint {
@@ -108,6 +115,27 @@ func installHostEndpoint(svc services.Hosts) endpoint.Endpoint {
 			}).Info("Installing host")
 
 		go svc.InstallHost(ctx, &host, rh.LocalNodePath)
+
+		return IDResponse{ID: host.ID}, err
+	}
+}
+
+func activateHostEndpoint(svc services.Hosts) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		log.Info("activate host")
+		req := request.(uuid.UUID)
+		host, err := svc.HostByID(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+
+		log.WithContext(ctx).
+			WithFields(logrus.Fields{
+				"requestID": ctx.Value(middleware.RequestIDKey),
+				"host":      host.Name,
+			}).Info("Installing host")
+
+		go svc.ActivateHost(ctx, &host)
 
 		return IDResponse{ID: host.ID}, err
 	}
