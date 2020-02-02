@@ -122,7 +122,7 @@ func installHostEndpoint(svc services.Hosts) endpoint.Endpoint {
 
 func activateHostEndpoint(svc services.Hosts) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		log.Info("activate host")
+
 		req := request.(uuid.UUID)
 		host, err := svc.HostByID(ctx, req)
 		if err != nil {
@@ -133,7 +133,7 @@ func activateHostEndpoint(svc services.Hosts) endpoint.Endpoint {
 			WithFields(logrus.Fields{
 				"requestID": ctx.Value(middleware.RequestIDKey),
 				"host":      host.Name,
-			}).Info("Installing host")
+			}).Info("Activating catapult node on host")
 
 		go svc.ActivateHost(ctx, &host)
 

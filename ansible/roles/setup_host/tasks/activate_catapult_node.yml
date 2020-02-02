@@ -18,3 +18,5 @@
   async: 10
   poll: 0
   when: catapult_node_running.rc == 1
+
+  

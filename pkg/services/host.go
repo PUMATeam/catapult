@@ -175,8 +175,7 @@ func (hs *hostsService) InstallHost(ctx context.Context, h *model.Host, localNod
 	hs.UpdateHostStatus(ctx, h, model.UP)
 }
 
-//  ActivateHost activate  on the host
-// TODO: leaving it as public to allow a user activate a host
+// activates catapult-node on the host
 func (hs *hostsService) ActivateHost(ctx context.Context, h *model.Host) {
 	hi := hostInstallData{
 		User:            h.User,
