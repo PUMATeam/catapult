@@ -2,7 +2,7 @@ package node
 
 import (
 	"context"
-	fmt "fmt"
+	"fmt"
 
 	"github.com/go-chi/chi/middleware"
 
@@ -150,6 +150,7 @@ func (n *Node) ConnectVolume(ctx context.Context, volume *Volume) error {
 
 type executeOnNode func(conn *grpc.ClientConn) (interface{}, error)
 
+// TODO properly handle when there is no network access to the host
 func runOnNode(conn *grpc.ClientConn, f executeOnNode) (interface{}, error) {
 	resp, err := f(conn)
 	return resp, err
