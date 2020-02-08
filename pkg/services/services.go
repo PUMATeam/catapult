@@ -20,6 +20,8 @@ type Hosts interface {
 	ActivateHost(ctx context.Context, h *model.Host)
 	GetConnManager(ctx context.Context) *node.Connections
 	InitializeHosts(ctx context.Context) []error
+
+	// TODO consider making private
 	FindHostUP(ctx context.Context) *model.Host
 }
 

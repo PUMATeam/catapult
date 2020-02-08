@@ -50,7 +50,6 @@ func (v *volumesService) AddVolume(ctx context.Context, volume VolumeReq) (uuid.
 		volSize)
 	_, err = v.storageService.Create(ctx, &storage.Volume{
 		UUID: volID.String(),
-
 		Size: volSize,
 	})
 	if err != nil {
@@ -61,13 +60,19 @@ func (v *volumesService) AddVolume(ctx context.Context, volume VolumeReq) (uuid.
 
 	v.log.WithContext(ctx).WithField("path", path).Infof("Created drive")
 
-	nodeService.ConnectVolume(ctx,
-		&node.Volume{VolumeID: volID.String(),
-			PoolName: "volumes"})
+	path, err = nodeService.ConnectVolume(ctx,
+		&node.Volume{
+			VolumeID:  volID.String(),
+			PoolName:  "volumes",
+			ImagePath: path})
+	if err != nil {
+		v.log.Errorf("Failed to connect volume %s", err)
+	}
 
 	v.log.WithContext(ctx).
 		WithField("volume", volID).
 		WithField("size", size).
+		WithField("path", path).
 		Infof("Mapped volume")
 
 	return volID, err
