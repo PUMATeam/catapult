@@ -2,7 +2,8 @@ package storage
 
 import (
 	context "context"
-	fmt "fmt"
+
+	log "github.com/sirupsen/logrus"
 
 	uuid "github.com/satori/go.uuid"
 	grpc "google.golang.org/grpc"
@@ -16,10 +17,11 @@ type Service interface {
 }
 
 type Storage struct {
+	log *log.Logger
 }
 
-func NewStorageService() *Storage {
-	return &Storage{}
+func NewStorageService(log *log.Logger) *Storage {
+	return &Storage{log: log}
 }
 
 func (s *Storage) Create(ctx context.Context, volume *Volume) (*Response, error) {
@@ -30,8 +32,8 @@ func (s *Storage) Create(ctx context.Context, volume *Volume) (*Response, error)
 		return nil, err
 	}
 
-	fmt.Printf("%v", resp.GetStatus().String())
-	conn.Close()
+	s.log.WithContext(ctx).WithField("Response", resp).Info("Received response")
+
 	return resp, nil
 }
 
