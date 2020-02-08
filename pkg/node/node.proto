@@ -44,9 +44,15 @@ message DriveResponse {
     string path = 3;
 }
 
+message ConnectResponse {
+    Status status = 1;
+    string path = 3;
+}
+
 message Volume {
     string volumeID = 1;
     string poolName = 2;
+    string imagePath = 3;
 }
 
 service Node {
@@ -55,5 +61,5 @@ service Node {
     rpc ListVMs(google.protobuf.Empty) returns (VmList) {}
 
     rpc CreateDrive(ImageName) returns (DriveResponse) {}
-    rpc ConnectVolume(Volume) returns (Response) {}
+    rpc ConnectVolume(Volume) returns (ConnectResponse) {}
 }

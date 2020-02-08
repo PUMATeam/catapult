@@ -63,7 +63,7 @@ func bootstrap(log *logrus.Logger) http.Handler {
 
 	vr := repositories.NewVMsRepository(db)
 	vs := services.NewVMsService(vr, hs, log)
-	ss := storage.NewStorageService()
+	ss := storage.NewStorageService(log)
 	vls := services.NewVolumesService(hs, ss, log)
 
 	return newAPI(hs, vs, vls)
