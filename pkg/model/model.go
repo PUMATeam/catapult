@@ -28,6 +28,15 @@ type VM struct {
 	Address        string    `sql:"address,type:varchar(16)" json:"address"`
 }
 
+// Volume represents the volumes table
+type Volume struct {
+	ID          uuid.UUID `sql:"id,pk,type:uuid default gen_random_uuid()" json:"id"`
+	Status      Status    `sql:"status,type:int4" json:"status"`
+	Description string    `sql:"description,type:varchar(255)" json:"description"`
+	Image       string    `sql:"image,type:varchar(50)" json:"image"`
+	Size        int64     `sql:"size,type:bigint" json:"size"`
+}
+
 type Status int
 
 // TODO split up to VM statuses and host statuses
