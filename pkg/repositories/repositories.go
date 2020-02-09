@@ -22,3 +22,9 @@ type VMs interface {
 	VMByID(context.Context, uuid.UUID) (model.VM, error)
 	UpdateVM(context.Context, model.VM) error
 }
+
+type Volumes interface {
+	AddVolume(context.Context, model.Volume) (uuid.UUID, error)
+	ListVolumes(context.Context) ([]model.Volume, error)
+	VolumeByID(context.Context, uuid.UUID) (model.Volume, error)
+}

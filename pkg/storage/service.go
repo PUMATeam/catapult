@@ -33,7 +33,7 @@ func (s *Storage) Create(ctx context.Context, volume *Volume) (*Response, error)
 	}
 
 	s.log.WithContext(ctx).WithField("Response", resp).Info("Received response")
-
+	conn.Close()
 	return resp, nil
 }
 

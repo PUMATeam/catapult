@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/PUMATeam/catapult/pkg/model"
 	node "github.com/PUMATeam/catapult/pkg/node"
 	"github.com/PUMATeam/catapult/pkg/repositories"
 	"github.com/PUMATeam/catapult/pkg/storage"
@@ -13,17 +14,18 @@ import (
 )
 
 type volumesService struct {
-	vmsRepository  repositories.VMs
-	hostsService   Hosts
-	storageService storage.Service
-	log            *log.Logger
+	volumesRepository repositories.Volumes
+	hostsService      Hosts
+	storageService    storage.Service
+	log               *log.Logger
 }
 
-func NewVolumesService(hs Hosts, s storage.Service, logger *log.Logger) Volumes {
+func NewVolumesService(hs Hosts, s storage.Service, vr repositories.Volumes, logger *log.Logger) Volumes {
 	vls := &volumesService{
-		hostsService:   hs,
-		storageService: s,
-		log:            logger,
+		hostsService:      hs,
+		storageService:    s,
+		volumesRepository: vr,
+		log:               logger,
 	}
 	return vls
 }
@@ -43,6 +45,22 @@ func (v *volumesService) AddVolume(ctx context.Context, volume VolumeReq) (uuid.
 		return uuid.Nil, err
 	}
 
+	v.log.WithContext(ctx).
+		WithFields(log.Fields{
+			"volume": volID,
+		}).
+		Infof("Adding volume to database")
+	_, err = v.volumesRepository.AddVolume(ctx, model.Volume{
+		ID:          volID,
+		Description: volume.Description,
+		Status:      model.INITIALIZING,
+		Image:       volume.ImageName,
+		Size:        size,
+	})
+	if err != nil {
+		v.log.WithContext(ctx).Error("Failed to add volume to database ", err)
+		return uuid.Nil, err
+	}
 	// TODO: extract to util
 	volSize := int64(math.Ceil(float64(size) / (1024 * 1024 * 1024)))
 	v.log.WithContext(ctx).Infof("Creating volume %v with size %s GiB",
@@ -79,5 +97,6 @@ func (v *volumesService) AddVolume(ctx context.Context, volume VolumeReq) (uuid.
 }
 
 type VolumeReq struct {
-	ImageName string `json:"image"`
+	ImageName   string `json:"image"`
+	Description string `json:"description"`
 }
