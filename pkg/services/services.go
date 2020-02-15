@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/PUMATeam/catapult/pkg/node"
+	"github.com/PUMATeam/catapult/pkg/rpc"
 
 	"github.com/PUMATeam/catapult/pkg/model"
 	uuid "github.com/satori/go.uuid"
@@ -18,7 +18,7 @@ type Hosts interface {
 	UpdateHostStatus(ctx context.Context, host *model.Host, status model.Status) error
 	InstallHost(ctx context.Context, h *model.Host, localNodePath string)
 	ActivateHost(ctx context.Context, h *model.Host)
-	GetConnManager(ctx context.Context) *node.Connections
+	GetConnManager(ctx context.Context) *rpc.GRPCConnection
 	InitializeHosts(ctx context.Context) []error
 
 	// TODO consider making private

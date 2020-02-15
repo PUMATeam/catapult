@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/PUMATeam/catapult/pkg/model"
+	"github.com/PUMATeam/catapult/pkg/rpc"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -24,12 +25,12 @@ type NodeService interface {
 
 type Node struct {
 	Host        *model.Host
-	connManager *Connections
+	connManager *rpc.GRPCConnection
 }
 
 // NewNodeService creates a Node instance
 // TODO add logger
-func NewNodeService(host *model.Host, connManager *Connections) NodeService {
+func NewNodeService(host *model.Host, connManager *rpc.GRPCConnection) NodeService {
 	return &Node{
 		Host:        host,
 		connManager: connManager,
@@ -57,14 +58,14 @@ func (n *Node) StartVM(ctx context.Context, vm model.VM) (*VmConfig, error) {
 		return client.StartVM(ctx, vmConfig)
 	}
 
-	conn := n.connManager.GetConnection(n.Host.ID)
+	conn := n.connManager.GetConnection(n.Host.Address)
 
 	// This can happen if the node manager was restarted
 	// manually, or there was an error
 	var err error
 	if conn == nil {
 		address := fmt.Sprintf("%s:%d", n.Host.Address, n.Host.Port)
-		conn, err = n.connManager.CreateConnection(ctx, n.Host.ID, address)
+		conn, err = n.connManager.Connect(ctx, address)
 
 		if err != nil {
 			return nil, err
@@ -99,7 +100,7 @@ func (n *Node) StopVM(ctx context.Context, vmID uuid.UUID) error {
 		return client.StopVM(ctx, uuid)
 	}
 
-	conn := n.connManager.GetConnection(n.Host.ID)
+	conn := n.connManager.GetConnection(n.Host.Address)
 	_, err := runOnNode(conn, f)
 
 	log.WithContext(ctx).
@@ -117,7 +118,7 @@ func (n *Node) CreateDrive(ctx context.Context, image string) (string, int64, er
 		return client.CreateDrive(ctx, &ImageName{Name: image})
 	}
 
-	conn := n.connManager.GetConnection(n.Host.ID)
+	conn := n.connManager.GetConnection(n.Host.Address)
 	resp, err := runOnNode(conn, f)
 	if err != nil {
 		return "", -1, err
@@ -134,7 +135,7 @@ func (n *Node) ConnectVolume(ctx context.Context, volume *Volume) (string, error
 		return client.ConnectVolume(ctx, volume)
 	}
 
-	conn := n.connManager.GetConnection(n.Host.ID)
+	conn := n.connManager.GetConnection(n.Host.Address)
 	resp, err := runOnNode(conn, f)
 	connectResp := resp.(*ConnectResponse)
 	if err != nil {

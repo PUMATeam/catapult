@@ -9,11 +9,11 @@ import (
 	"strconv"
 	"syscall"
 
+	"github.com/PUMATeam/catapult/pkg/rpc"
 	"github.com/PUMATeam/catapult/pkg/storage"
 
 	logrus "github.com/sirupsen/logrus"
 
-	"github.com/PUMATeam/catapult/pkg/node"
 	"github.com/PUMATeam/catapult/pkg/util"
 
 	"github.com/go-chi/chi/middleware"
@@ -28,7 +28,7 @@ import (
 )
 
 var log *logrus.Logger
-var connManager = node.NewNodeConnectionManager()
+var connManager = rpc.NewGRPCConnection()
 
 func newAPI(hs services.Hosts,
 	vs services.VMs,
@@ -63,7 +63,7 @@ func bootstrap(log *logrus.Logger) http.Handler {
 
 	vr := repositories.NewVMsRepository(db)
 	vs := services.NewVMsService(vr, hs, log)
-	ss := storage.NewStorageService(log)
+	ss := storage.NewStorageService(connManager, log)
 	vrs := repositories.NewVolumesRepository(db)
 	vls := services.NewVolumesService(hs, ss, vrs, log)
 
