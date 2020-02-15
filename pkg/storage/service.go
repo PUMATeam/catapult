@@ -3,10 +3,10 @@ package storage
 import (
 	context "context"
 
+	"github.com/PUMATeam/catapult/pkg/rpc"
 	log "github.com/sirupsen/logrus"
 
 	uuid "github.com/satori/go.uuid"
-	grpc "google.golang.org/grpc"
 )
 
 // TODO: move to internal?
@@ -17,15 +17,19 @@ type Service interface {
 }
 
 type Storage struct {
-	log *log.Logger
+	log         *log.Logger
+	connManager *rpc.GRPCConnection
 }
 
-func NewStorageService(log *log.Logger) *Storage {
-	return &Storage{log: log}
+func NewStorageService(connManager *rpc.GRPCConnection, log *log.Logger) *Storage {
+	return &Storage{log: log, connManager: connManager}
 }
 
 func (s *Storage) Create(ctx context.Context, volume *Volume) (*Response, error) {
-	conn := createConn(ctx)
+	conn, err := s.connManager.Connect(ctx, "localhost:5001")
+	if err != nil {
+		return nil, err
+	}
 	client := NewStorageClient(conn)
 	resp, err := client.Create(ctx, &Volume{UUID: volume.GetUUID(), Size: volume.GetSize()})
 	if err != nil {
@@ -43,16 +47,4 @@ func (s *Storage) Delete(ctx context.Context, volID *uuid.UUID) (*Response, erro
 
 func (s *Storage) List(ctx context.Context) (*VolumeList, error) {
 	return nil, nil
-}
-
-func createConn(ctx context.Context) *grpc.ClientConn {
-	conn, err := grpc.DialContext(ctx,
-		"localhost:50051",
-		grpc.WithInsecure())
-
-	if err != nil {
-		panic(err)
-	}
-
-	return conn
 }

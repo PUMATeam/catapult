@@ -8,7 +8,7 @@ import (
 
 	logrus "github.com/sirupsen/logrus"
 
-	node "github.com/PUMATeam/catapult/pkg/node"
+	"github.com/PUMATeam/catapult/pkg/rpc"
 	"github.com/PUMATeam/catapult/pkg/util"
 
 	"github.com/PUMATeam/catapult/pkg/model"
@@ -16,7 +16,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-func NewHostsService(hr repositories.Hosts, log *logrus.Logger, connManager *node.Connections) Hosts {
+func NewHostsService(hr repositories.Hosts, log *logrus.Logger, connManager *rpc.GRPCConnection) Hosts {
 	return &hostsService{
 		hostsRepository: hr,
 		logger:          log,
@@ -27,7 +27,7 @@ func NewHostsService(hr repositories.Hosts, log *logrus.Logger, connManager *nod
 type hostsService struct {
 	hostsRepository repositories.Hosts
 	logger          *logrus.Logger
-	connManager     *node.Connections
+	connManager     *rpc.GRPCConnection
 }
 
 // InitalizeHosts initializes running hosts when the app starts.
@@ -55,7 +55,7 @@ func (hs *hostsService) InitializeHosts(ctx context.Context) []error {
 			go func(h *model.Host) {
 				defer wg.Done()
 				wg.Add(1)
-				_, err := hs.connManager.CreateConnection(ctx, h.ID, address)
+				_, err := hs.connManager.Connect(ctx, address)
 
 				if err == nil {
 					hs.UpdateHostStatus(ctx, h, model.UP)
@@ -165,7 +165,7 @@ func (hs *hostsService) InstallHost(ctx context.Context, h *model.Host, localNod
 	hs.log(ctx, h.Name).
 		WithField("address", address).
 		Info("Createting grpc connection for host...")
-	_, err = hs.connManager.CreateConnection(ctx, h.ID, address)
+	_, err = hs.connManager.Connect(ctx, address)
 	if err != nil {
 		hs.log(ctx, h.Name).Error("Failed to create grpc connections, "+
 			"will be retried upon sending a request: ", err)
@@ -203,7 +203,7 @@ func (hs *hostsService) ActivateHost(ctx context.Context, h *model.Host) {
 	hs.log(ctx, h.Name).
 		WithField("address", address).
 		Info("Createting grpc connection for host...")
-	_, err = hs.connManager.CreateConnection(ctx, h.ID, address)
+	_, err = hs.connManager.Connect(ctx, address)
 	if err != nil {
 		hs.log(ctx, h.Name).Error("Failed to create grpc connections, "+
 			"will be retried upon sending a request: ", err)
@@ -241,7 +241,7 @@ func (hs *hostsService) FindHostUP(ctx context.Context) *model.Host {
 	return nil
 }
 
-func (hs *hostsService) GetConnManager(ctx context.Context) *node.Connections {
+func (hs *hostsService) GetConnManager(ctx context.Context) *rpc.GRPCConnection {
 	return hs.connManager
 }
 
