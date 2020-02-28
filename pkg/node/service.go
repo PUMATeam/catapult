@@ -51,25 +51,17 @@ func (n *Node) StartVM(ctx context.Context, vm model.VM) (*VmConfig, error) {
 		RootFileSystem: vm.RootFileSystem,
 	}
 
-	// TODO: make port configurable
+	address := fmt.Sprintf("%s:%d", n.Host.Address, n.Host.Port)
+
 	f := func(conn *grpc.ClientConn) (interface{}, error) {
 		client := NewNodeClient(conn)
 		log.Info("Sending start vm request...")
 		return client.StartVM(ctx, vmConfig)
 	}
 
-	conn := n.connManager.GetConnection(n.Host.Address)
-
-	// This can happen if the node manager was restarted
-	// manually, or there was an error
-	var err error
+	conn := n.connManager.GetConnection(address)
 	if conn == nil {
-		address := fmt.Sprintf("%s:%d", n.Host.Address, n.Host.Port)
-		conn, err = n.connManager.Connect(ctx, address)
-
-		if err != nil {
-			return nil, err
-		}
+		return nil, fmt.Errorf("No connection found")
 	}
 
 	resp, err := runOnNode(conn, f)
