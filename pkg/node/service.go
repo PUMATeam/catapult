@@ -87,12 +87,23 @@ func (n *Node) StopVM(ctx context.Context, vmID uuid.UUID) error {
 		Value: vmID.String(),
 	}
 
+	log.WithContext(ctx).
+		WithFields(log.Fields{
+			"requestID": ctx.Value(middleware.RequestIDKey),
+			"vm":        vmID,
+			"hostID":    n.Host.Address,
+		}).Infof("Stopping VM %v", vmID)
+
 	f := func(conn *grpc.ClientConn) (interface{}, error) {
 		client := NewNodeClient(conn)
 		return client.StopVM(ctx, uuid)
 	}
 
-	conn := n.connManager.GetConnection(n.Host.Address)
+	address := fmt.Sprintf("%s:%d", n.Host.Address, n.Host.Port)
+	conn := n.connManager.GetConnection(address)
+	if conn == nil {
+		return fmt.Errorf("No connection found")
+	}
 	_, err := runOnNode(conn, f)
 
 	log.WithContext(ctx).

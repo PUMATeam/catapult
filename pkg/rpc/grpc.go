@@ -23,7 +23,7 @@ func NewGRPCConnection() *GRPCConnection {
 	return &GRPCConnection{}
 }
 
-// Connect connects to and `address` and stores it in the internal map
+// Connect connects to an `address` and stores it in the internal map
 func (g *GRPCConnection) Connect(ctx context.Context, address string) (*grpc.ClientConn, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
